@@ -1,15 +1,12 @@
-# Quick setup:
-
-# bash
-# pip install -r requirements.txt
-# export ANTHROPIC_API_KEY=your_key_here   # or set on Windows
-# python app.py
-# Then go to http://localhost:5000.
-
-
+# ╔══════════════════════════════════════════════════╗
 # ║  Sprout — The Aesthetic Visual Mapping OS        ║
 # ║  Backend: Flask + Anthropic Claude               ║
 # ╚══════════════════════════════════════════════════╝
+#
+# Setup:
+#   pip install flask anthropic
+#   export ANTHROPIC_API_KEY=your_key_here
+#   python app.py  →  http://localhost:5000
 
 import os
 import json
@@ -226,33 +223,6 @@ def content_shotlist():
     prompt = (f"B-roll shot list for '{node}' in a video about '{topic}'. "
               "5 shots: 📽️ Shot type | 🎯 Subject | ⏱️ Duration | 💭 Why it works. Under 200 words.")
     return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
-
-
-# ════════════════════════════════════════
-#  AI — LUMI COMPANION
-# ════════════════════════════════════════
-
-@app.route("/api/lumi/explain", methods=["POST"])
-def lumi_explain():
-    data  = request.json or {}
-    node  = data.get("node", "")
-    topic = data.get("topic", "")
-    prompt = (f"Explain '{node}' (part of '{topic}') in 2-3 simple friendly sentences with a cute analogy. "
-              "Warm tone, start with emoji. Under 70 words.")
-    return jsonify({"success": True, "text": ask(prompt, max_tokens=150)})
-
-
-@app.route("/api/lumi/suggest", methods=["POST"])
-def lumi_suggest():
-    data  = request.json or {}
-    node  = data.get("node", "")
-    topic = data.get("topic", "")
-    mode  = data.get("mode", "study")
-    subject = f"the '{node}' branch of '{topic}'" if node else f"the map about '{topic}'"
-    flavour = "study sub-topics" if mode == "study" else "content angles or creative twists"
-    prompt = (f"Suggest 3 fun {flavour} to ADD to {subject}. "
-              "Start with 'Here are some ideas 🌿' then bullet points. Under 80 words.")
-    return jsonify({"success": True, "text": ask(prompt, max_tokens=180)})
 
 
 # ════════════════════════════════════════
