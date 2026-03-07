@@ -1,120 +1,1045 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sprout</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sprout 🌱</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Bubblegum+Sans&display=swap" rel="stylesheet"/>
+
+  <style>
+  /* ══════════════════════════════════════
+     TOKENS
+  ══════════════════════════════════════ */
+  :root {
+    /* neutrals */
+    --bg:       #fdf6f0;
+    --card:     #fffdf9;
+    --white:    #fffcfe;
+    --ink:      #3d3530;
+    --muted:    #a89f9a;
+    --subtle:   #e8e0db;
+    --border:   #ede5e0;
+
+    /* study — mint sage */
+    --s-pri:    #6dc49a;
+    --s-dark:   #3a7a5c;
+    --s-light:  #e6f7ef;
+    --s-border: #b5e3cb;
+
+    /* content — rose peach */
+    --c-pri:    #f4a4b8;
+    --c-dark:   #be4e6a;
+    --c-light:  #fdeef4;
+    --c-border: #f8ccda;
+
+    /* active mode vars (JS swaps these) */
+    --pri:    var(--s-pri);
+    --dark:   var(--s-dark);
+    --light:  var(--s-light);
+    --mbord:  var(--s-border);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ══════════════════════════════════════
+     SIDEBAR
+  ══════════════════════════════════════ */
+  #sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: var(--white);
+    border-right: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 20;
+    box-shadow: 3px 0 20px rgba(61,53,48,.07);
+    transition: border-color .3s;
+  }
+
+  /* Header gradient */
+  .sb-header {
+    padding: 20px 18px 16px;
+    background: linear-gradient(135deg, #fde8d0 0%, #f9d5e8 50%, #e8d5f8 100%);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .sb-header::after {
+    content: '✿';
+    position: absolute;
+    top: 10px; right: 16px;
+    font-size: 26px; opacity: .45;
+    animation: sway 3s ease-in-out infinite;
+  }
+  @keyframes sway { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(8deg)} }
+
+  .logo {
+    font-family: 'Bubblegum Sans', cursive;
+    font-size: 24px;
+    color: var(--ink);
+  }
+  .logo em { color: var(--s-dark); font-style: normal; }
+  .tagline {
+    font-size: 11px; color: var(--muted);
+    margin-top: 3px; font-style: italic;
+  }
+
+  /* Mode toggle */
+  .mode-toggle {
+    display: flex;
+    background: rgba(255,255,255,.55);
+    border-radius: 14px;
+    padding: 3px;
+    margin-top: 12px;
+    gap: 3px;
+    border: 1.5px solid rgba(255,255,255,.7);
+  }
+  .mode-btn {
+    flex: 1; padding: 6px 4px;
+    border: none; border-radius: 11px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 11.5px;
+    cursor: pointer; transition: all .22s;
+    background: transparent; color: var(--muted);
+  }
+  .mode-btn.active-study  { background: var(--s-pri); color: #fff; box-shadow: 0 2px 8px rgba(61,53,48,.15); }
+  .mode-btn.active-content{ background: var(--c-pri); color: #fff; box-shadow: 0 2px 8px rgba(61,53,48,.15); }
+
+  /* Sections */
+  .sb-section {
+    padding: 14px 16px 12px;
+    border-bottom: 1.5px solid var(--border);
+    flex-shrink: 0;
+  }
+  .sec-label {
+    font-size: 9.5px; font-weight: 900;
+    letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--pri); margin-bottom: 9px;
+    transition: color .3s;
+  }
+
+  /* Inputs */
+  input[type="text"], textarea, select {
+    width: 100%; padding: 9px 12px;
+    border: 1.5px solid var(--border); border-radius: 11px;
+    background: var(--white); font-family: 'Nunito', sans-serif;
+    font-size: 12.5px; color: var(--ink); outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--pri);
+    box-shadow: 0 0 0 3px var(--light);
+  }
+  select {
+    appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23a89f9a' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    padding-right: 28px;
+  }
+  .input-row { display: flex; gap: 7px; margin-top: 8px; }
+  .input-row input { flex: 1; }
+
+  /* Buttons */
+  .btn {
+    padding: 8px 14px; border-radius: 11px; border: none;
+    font-family: 'Nunito', sans-serif; font-weight: 800;
+    font-size: 12px; cursor: pointer; transition: all .2s;
+    white-space: nowrap; display: inline-flex;
+    align-items: center; justify-content: center; gap: 5px;
+  }
+  .btn-primary {
+    background: var(--pri); color: #fff;
+    box-shadow: 0 3px 10px rgba(61,53,48,.15);
+    transition: background .3s, box-shadow .2s;
+  }
+  .btn-primary:hover { filter: brightness(1.07); transform: translateY(-1px); }
+  .btn-soft {
+    background: var(--light); color: var(--dark);
+    border: 1.5px solid var(--mbord);
+    transition: background .3s, color .3s, border-color .3s;
+  }
+  .btn-soft:hover { filter: brightness(.96); }
+  .btn-full { width: 100%; margin-top: 7px; padding: 9px; }
+
+  /* Node list */
+  .node-list { max-height: 180px; overflow-y: auto; margin-top: 8px; }
+  .node-item {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 9px; border-radius: 9px; margin-bottom: 3px;
+    background: var(--white); border: 1.5px solid var(--border);
+    cursor: pointer; transition: all .15s;
+  }
+  .node-item:hover { background: var(--light); border-color: var(--mbord); }
+  .node-item.sel    { background: var(--light); border-color: var(--pri); }
+  .node-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--pri); flex-shrink: 0; }
+  .node-dot.root { background: var(--dark); }
+  .node-text { font-size: 12px; font-weight: 700; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .node-del {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 13px; padding: 2px 4px;
+    border-radius: 6px; opacity: 0; transition: opacity .15s;
+  }
+  .node-item:hover .node-del { opacity: 1; }
+  .node-del:hover { background: #ffe0ec; color: #e11d48; }
+
+  /* Suggestion chips */
+  #sugg-panel { padding: 12px 16px; border-bottom: 1.5px solid var(--border); display: none; }
+  #sugg-panel.vis { display: block; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip {
+    padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 700;
+    background: var(--light); color: var(--dark);
+    border: 1.5px solid var(--mbord); cursor: pointer; transition: all .15s;
+  }
+  .chip:hover { filter: brightness(.96); transform: translateY(-1px); }
+  .chip.used { opacity: .45; cursor: default; pointer-events: none; }
+
+  /* Spinner */
+  .spin {
+    display: inline-block; width: 13px; height: 13px;
+    border: 2.5px solid rgba(255,255,255,.35);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spinning .7s linear infinite;
+  }
+  @keyframes spinning { to { transform: rotate(360deg); } }
+
+  /* ══════════════════════════════════════
+     MAIN CANVAS
+  ══════════════════════════════════════ */
+  #main {
+    flex: 1; position: relative; overflow: hidden;
+    background: radial-gradient(ellipse at 35% 65%, #ffedf6 0%, #fdf6f0 45%, #f0e8fd 100%);
+  }
+
+  /* Floating decorations */
+  .petal {
+    position: absolute; pointer-events: none;
+    font-size: 18px; opacity: .13;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
+    8%   { opacity: .13; }
+    92%  { opacity: .13; }
+    100% { transform: translateY(-10vh) rotate(400deg); opacity: 0; }
+  }
+
+  #map-svg {
+    width: 100%; height: 100%;
+    cursor: grab;
+  }
+  #map-svg:active { cursor: grabbing; }
+
+  /* Empty state */
+  #empty {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    pointer-events: none; transition: opacity .4s;
+  }
+  #empty.gone { opacity: 0; }
+  .empty-icon { font-size: 68px; margin-bottom: 14px; animation: pulse 2.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07)} }
+  .empty-title { font-family: 'Bubblegum Sans', cursive; font-size: 21px; color: var(--ink); margin-bottom: 7px; }
+  .empty-sub { font-size: 13px; color: var(--muted); text-align: center; max-width: 240px; line-height: 1.65; }
+
+  /* AI loading overlay */
+  #ai-load {
+    position: absolute; inset: 0;
+    background: rgba(253,246,240,.72);
+    backdrop-filter: blur(5px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px; z-index: 60;
+    transition: opacity .3s;
+  }
+  #ai-load.gone { display: none; }
+  .bloom-spin { font-size: 34px; animation: spinning 1.2s linear infinite; }
+  .load-txt { font-family: 'Bubblegum Sans', cursive; font-size: 15px; color: var(--ink); }
+
+  /* Toolbar */
+  #toolbar {
+    position: absolute; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 8px; align-items: center;
+    background: rgba(255,252,254,.88);
+    backdrop-filter: blur(14px);
+    border: 1.5px solid var(--border);
+    border-radius: 24px; padding: 9px 16px;
+    box-shadow: 0 6px 28px rgba(61,53,48,.1);
+  }
+  .tool-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1.5px solid var(--border); background: var(--white);
+    cursor: pointer; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s; color: var(--ink);
+  }
+  .tool-btn:hover { background: var(--light); border-color: var(--pri); transform: scale(1.1); }
+  .toolbar-div { width: 1px; height: 22px; background: var(--border); margin: 0 2px; }
+
+  /* ══════════════════════════════════════
+     ACTION PANEL (right slide-in)
+  ══════════════════════════════════════ */
+  #action-panel {
+    position: absolute; top: 0; right: -340px; bottom: 0; width: 320px;
+    background: var(--white);
+    border-left: 2px solid var(--border);
+    display: flex; flex-direction: column;
+    box-shadow: -6px 0 28px rgba(61,53,48,.08);
+    transition: right .28s cubic-bezier(.4,0,.2,1);
+    z-index: 30;
+  }
+  #action-panel.open { right: 0; }
+
+  .ap-head {
+    padding: 14px 16px 12px;
+    border-bottom: 1.5px solid var(--border);
+    flex-shrink: 0;
+  }
+  .ap-mode-label {
+    font-size: 9.5px; font-weight: 900; text-transform: uppercase;
+    letter-spacing: 1.2px; color: var(--pri); margin-bottom: 3px;
+    transition: color .3s;
+  }
+  .ap-node-name {
+    font-family: 'Bubblegum Sans', cursive;
+    font-size: 18px; color: var(--ink); line-height: 1.2;
+  }
+  .ap-node-emoji { font-size: 22px; margin-top: 5px; }
+  .ap-close {
+    position: absolute; top: 12px; right: 14px;
+    background: var(--border); border: none; border-radius: 50%;
+    width: 24px; height: 24px; cursor: pointer;
+    font-size: 11px; color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ap-close:hover { background: var(--subtle); }
+
+  .ap-actions {
+    padding: 12px 14px;
+    border-bottom: 1.5px solid var(--border);
+    flex-shrink: 0;
+  }
+  .ap-actions-label {
+    font-size: 9px; font-weight: 900; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+  }
+  .action-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
+  }
+  .act-btn {
+    padding: 8px 6px; border-radius: 12px; cursor: pointer;
+    font-family: 'Nunito', sans-serif; font-weight: 800;
+    font-size: 11.5px; transition: all .2s;
+    border: 2px solid var(--border);
+    background: var(--white); color: var(--ink);
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .act-btn:hover { border-color: var(--pri); background: var(--light); }
+  .act-btn.active { background: var(--pri); color: #fff; border-color: var(--pri); }
+
+  .ap-output {
+    flex: 1; overflow-y: auto;
+    padding: 14px 16px;
+    font-size: 13px; line-height: 1.75; color: var(--ink);
+  }
+  .ap-output.loading {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
+  }
+  .ap-empty { color: var(--muted); text-align: center; padding-top: 32px; font-weight: 700; }
+
+
+
+  /* ══════════════════════════════════════
+     CONTEXT MENU
+  ══════════════════════════════════════ */
+  #ctx {
+    position: fixed; background: var(--white);
+    border: 1.5px solid var(--border); border-radius: 13px;
+    padding: 7px; box-shadow: 0 8px 32px rgba(61,53,48,.12);
+    z-index: 500; display: none; min-width: 165px;
+  }
+  #ctx.vis { display: block; }
+  .ctx-item {
+    padding: 7px 13px; border-radius: 8px;
+    font-size: 12.5px; font-weight: 700;
+    cursor: pointer; transition: background .15s;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .ctx-item:hover { background: var(--light); color: var(--dark); }
+  .ctx-item.danger:hover { background: #ffe8ec; color: #e11d48; }
+
+  /* ══════════════════════════════════════
+     TOAST
+  ══════════════════════════════════════ */
+  #toast {
+    position: fixed; top: 18px; left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--pri); color: #fff;
+    padding: 10px 22px; border-radius: 22px;
+    font-weight: 800; font-size: 12.5px;
+    box-shadow: 0 5px 20px rgba(61,53,48,.18);
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .3s;
+    z-index: 999;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ══════════════════════════════════════
+     SCROLLBAR
+  ══════════════════════════════════════ */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ══════════════════════════════════════
+     RESPONSIVE HINT
+  ══════════════════════════════════════ */
+  .hint-pill {
+    position: absolute; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(61,53,48,.72); color: #fff;
+    border-radius: 20px; padding: 7px 17px;
+    font-size: 11.5px; font-weight: 800;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    animation: fadeSlideUp .5s ease-out;
+    transition: opacity .3s;
+  }
+  .hint-pill.gone { opacity: 0; }
+  @keyframes fadeSlideUp {
+    from { opacity:0; transform: translateX(-50%) translateY(10px); }
+    to   { opacity:1; transform: translateX(-50%) translateY(0); }
+  }
+  </style>
 </head>
 <body>
 
-  <!-- ════ SIDEBAR ════ -->
-  <aside id="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">Bloom<span>Map</span></div>
-      <div class="tagline">grow your ideas beautifully ✦</div>
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside id="sidebar">
+  <div class="sb-header">
+    <div class="logo">🌱 <em>Sprout</em></div>
+    <div class="tagline">grow your ideas beautifully ✦</div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active-study" id="btn-study"  onclick="setMode('study')">📚 Study Hub</button>
+      <button class="mode-btn"              id="btn-content" onclick="setMode('content')">🎨 Creative Studio</button>
     </div>
-
-    <!-- Root topic -->
-    <div class="sidebar-section">
-      <div class="section-label">✦ Central Topic</div>
-      <input type="text" id="root-input" placeholder="e.g. Study Plan, Dream Career…" />
-      <button class="btn btn-primary btn-full" onclick="setRootTopic()">🌱 Plant My Tree</button>
-    </div>
-
-    <!-- Add idea -->
-    <div class="sidebar-section" id="add-section" style="display:none">
-      <div class="section-label">✦ Add an Idea</div>
-      <select id="parent-select"></select>
-      <div class="input-row">
-        <input type="text" id="idea-input" placeholder="Type your idea…" onkeydown="if(event.key==='Enter')addIdea()" />
-        <button class="btn btn-primary" onclick="addIdea()">＋</button>
-      </div>
-    </div>
-
-    <!-- AI tools -->
-    <div class="sidebar-section" id="ai-section" style="display:none">
-      <div class="section-label">✦ AI Magic ✨</div>
-      <button class="btn btn-lavender btn-full" onclick="generateIdeas()">✨ Generate Ideas for Selected</button>
-      <button class="btn btn-soft btn-full" onclick="expandSelected()">🌿 Expand Selected Branch</button>
-      <button class="btn btn-soft btn-full" onclick="refineSelected()">✏️ Refine Selected Idea</button>
-    </div>
-
-    <!-- AI suggestions -->
-    <div id="suggestions-panel">
-      <div class="section-label">✦ AI Suggestions — click to add</div>
-      <div class="suggestion-chips" id="suggestion-chips"></div>
-    </div>
-
-    <!-- Node list -->
-    <div class="sidebar-section" id="nodes-section" style="display:none; flex:1">
-      <div class="section-label">✦ Your Ideas</div>
-      <div class="node-list" id="node-list"></div>
-    </div>
-  </aside>
-
-  <!-- ════ CANVAS ════ -->
-  <main id="main">
-    <!-- Floating petals decoration -->
-    <div class="petal" style="left:10%;animation-duration:18s;animation-delay:0s;font-size:18px">🌸</div>
-    <div class="petal" style="left:25%;animation-duration:22s;animation-delay:4s;font-size:14px">✿</div>
-    <div class="petal" style="left:60%;animation-duration:16s;animation-delay:8s;font-size:20px">🌸</div>
-    <div class="petal" style="left:80%;animation-duration:20s;animation-delay:2s;font-size:12px">✾</div>
-    <div class="petal" style="left:45%;animation-duration:25s;animation-delay:6s;font-size:16px">🌺</div>
-
-    <!-- SVG mindmap -->
-    <svg id="mindmap-svg" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="glow-filter">
-          <feGaussianBlur stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="soft-shadow">
-          <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="rgba(200,80,150,0.18)"/>
-        </filter>
-      </defs>
-      <g id="pan-group" transform="translate(0,0) scale(1)">
-        <g id="edges-group"></g>
-        <g id="nodes-group"></g>
-      </g>
-    </svg>
-
-    <!-- Empty state -->
-    <div id="empty-state">
-      <div class="empty-icon">🌸</div>
-      <div class="empty-title">Your canvas awaits</div>
-      <div class="empty-sub">Type your central topic in the sidebar to grow your beautiful mind map</div>
-    </div>
-
-    <!-- AI loading overlay -->
-    <div class="ai-loading hidden" id="ai-loading">
-      <div class="bloom-spin">✿</div>
-      <div class="ai-loading-text">AI is blooming ideas for you…</div>
-    </div>
-
-    <!-- Bottom toolbar -->
-    <div id="toolbar">
-      <button class="tool-btn" onclick="zoom(0.15)" title="Zoom In">＋</button>
-      <button class="tool-btn" onclick="zoom(-0.15)" title="Zoom Out">－</button>
-      <button class="tool-btn" onclick="resetView()" title="Reset View">⌖</button>
-      <div class="toolbar-divider"></div>
-      <button class="tool-btn" onclick="clearMap()" title="Clear Map">🗑</button>
-    </div>
-  </main>
-
-  <!-- Context menu -->
-  <div id="ctx-menu">
-    <div class="ctx-item" onclick="ctxAddChild()">＋ &nbsp;Add child idea</div>
-    <div class="ctx-item" onclick="ctxAIExpand()">✨ &nbsp;AI expand this</div>
-    <div class="ctx-item" onclick="ctxRefine()">✏️ &nbsp;Refine with AI</div>
-    <div class="ctx-item danger" onclick="ctxDelete()">✕ &nbsp;Delete node</div>
   </div>
 
-  <!-- Toast notification -->
-  <div id="toast"></div>
+  <!-- Central topic -->
+  <div class="sb-section">
+    <div class="sec-label" id="sl-topic">✦ Central Topic</div>
+    <input type="text" id="root-input" placeholder="e.g. OOP, My Vlog Idea…"/>
+    <button class="btn btn-primary btn-full" onclick="plantTree()">🌱 Sprout Map</button>
+  </div>
 
-  <script src="/static/script.js"></script>
+  <!-- Add idea -->
+  <div class="sb-section" id="add-sec" style="display:none">
+    <div class="sec-label">✦ Add an Idea</div>
+    <select id="parent-sel"></select>
+    <div class="input-row">
+      <input type="text" id="idea-input" placeholder="Type an idea…" onkeydown="if(event.key==='Enter')addIdea()"/>
+      <button class="btn btn-primary" onclick="addIdea()">＋</button>
+    </div>
+  </div>
+
+  <!-- AI tools -->
+  <div class="sb-section" id="ai-sec" style="display:none">
+    <div class="sec-label">✦ AI Magic ✨</div>
+    <button class="btn btn-soft btn-full" onclick="aiGenerate()">✨ Generate Ideas for Node</button>
+    <button class="btn btn-soft btn-full" onclick="aiExpand()">🌿 Expand Selected Branch</button>
+    <button class="btn btn-soft btn-full" onclick="aiRefine()">✏️ Refine Selected Node</button>
+  </div>
+
+  <!-- Suggestion chips -->
+  <div id="sugg-panel">
+    <div class="sec-label">✦ Suggestions — click to add</div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <!-- Node list -->
+  <div class="sb-section" id="nodes-sec" style="display:none; flex:1">
+    <div class="sec-label">✦ Your Ideas</div>
+    <div class="node-list" id="node-list"></div>
+  </div>
+</aside>
+
+<!-- ════════════════ CANVAS ════════════════ -->
+<main id="main">
+
+  <!-- Petals -->
+  <div class="petal" style="left:8%;animation-duration:20s;animation-delay:0s">🌸</div>
+  <div class="petal" style="left:22%;animation-duration:26s;animation-delay:5s;font-size:14px">✿</div>
+  <div class="petal" style="left:55%;animation-duration:18s;animation-delay:9s">🌸</div>
+  <div class="petal" style="left:75%;animation-duration:23s;animation-delay:2s;font-size:13px">✾</div>
+  <div class="petal" style="left:42%;animation-duration:30s;animation-delay:7s;font-size:20px">🌺</div>
+  <div class="petal" style="left:90%;animation-duration:17s;animation-delay:12s;font-size:12px">✿</div>
+
+  <!-- SVG mindmap -->
+  <svg id="map-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="glow-f">
+        <feGaussianBlur stdDeviation="3.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="soft-sh">
+        <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="rgba(100,60,80,.14)"/>
+      </filter>
+    </defs>
+    <g id="pan-g" transform="translate(0,0) scale(1)">
+      <g id="edges-g"></g>
+      <g id="nodes-g"></g>
+    </g>
+  </svg>
+
+  <!-- Empty state -->
+  <div id="empty">
+    <div class="empty-icon">🌱</div>
+    <div class="empty-title">Your canvas awaits</div>
+    <div class="empty-sub">Type a topic in the sidebar and press Sprout Map to grow your beautiful mind tree</div>
+  </div>
+
+  <!-- AI loading -->
+  <div id="ai-load" class="gone">
+    <div class="bloom-spin">✿</div>
+    <div class="load-txt">Lumi is blooming ideas for you…</div>
+  </div>
+
+  <!-- Toolbar -->
+  <div id="toolbar">
+    <button class="tool-btn" onclick="doZoom(.15)" title="Zoom in">＋</button>
+    <button class="tool-btn" onclick="doZoom(-.15)" title="Zoom out">－</button>
+    <button class="tool-btn" onclick="resetView()" title="Reset view">⌖</button>
+    <div class="toolbar-div"></div>
+    <button class="tool-btn" onclick="clearMap()" title="Clear map">🗑</button>
+  </div>
+
+  <!-- Click hint -->
+  <div id="hint-pill" class="hint-pill gone">🌸 Click a node to Sprout it!</div>
+
+  <!-- Action panel -->
+  <div id="action-panel">
+    <div class="ap-head" style="position:relative">
+      <div class="ap-mode-label" id="ap-mode-label">🌿 Study Node</div>
+      <div class="ap-node-name" id="ap-node-name">—</div>
+      <div class="ap-node-emoji" id="ap-node-emoji"></div>
+      <button class="ap-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="ap-actions">
+      <div class="ap-actions-label">Sprout this node ✨</div>
+      <div class="action-grid" id="action-grid"></div>
+    </div>
+    <div class="ap-output" id="ap-output">
+      <div class="ap-empty">Pick an action to sprout this node! 🌱</div>
+    </div>
+  </div>
+
+
+</main>
+
+<!-- Context menu -->
+<div id="ctx">
+  <div class="ctx-item" onclick="ctxChild()">＋ Add child idea</div>
+  <div class="ctx-item" onclick="ctxExpand()">✨ AI expand this</div>
+  <div class="ctx-item" onclick="ctxRefine()">✏️ Refine with AI</div>
+  <div class="ctx-item" onclick="ctxSprout()">🌱 Sprout this node</div>
+  <div class="ctx-item danger" onclick="ctxDel()">✕ Delete node</div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ════════════════ SCRIPT ════════════════ -->
+<script>
+/* ──────────────────────────────────────
+   STATE
+─────────────────────────────────────── */
+let tree = null;
+let nodeId = 0;
+let selId = null;
+let ctxId = null;
+let mode = 'study';   // 'study' | 'content'
+let panelOpen = false;
+let panelNodeId = null;
+
+let panX = 0, panY = 0, scale = 1;
+let panning = false, px0 = 0, py0 = 0;
+
+/* ──────────────────────────────────────
+   DATA
+─────────────────────────────────────── */
+function mkNode(text, parentId = null) {
+  return { id: nodeId++, text, parentId, children: [], x: 0, y: 0, depth: 0 };
+}
+function find(node, id) {
+  if (!node) return null;
+  if (node.id === id) return node;
+  for (const c of node.children) { const f = find(c, id); if (f) return f; }
+  return null;
+}
+function all(node, arr = []) {
+  if (!node) return arr;
+  arr.push(node);
+  node.children.forEach(c => all(c, arr));
+  return arr;
+}
+function del(node, id) {
+  if (!node) return false;
+  const i = node.children.findIndex(c => c.id === id);
+  if (i !== -1) { node.children.splice(i, 1); return true; }
+  for (const c of node.children) if (del(c, id)) return true;
+  return false;
+}
+
+/* ──────────────────────────────────────
+   MODE
+─────────────────────────────────────── */
+const STUDY_ACTIONS = [
+  { id:'explain',   icon:'💡', label:'Explain It'   },
+  { id:'quiz',      icon:'🧠', label:'Quiz Me'       },
+  { id:'flashcard', icon:'📇', label:'Flashcards'    },
+  { id:'connect',   icon:'🔗', label:'Connections'   },
+];
+const CONTENT_ACTIONS = [
+  { id:'script',    icon:'🎬', label:'TikTok Script' },
+  { id:'moodboard', icon:'🎨', label:'Moodboard'     },
+  { id:'hooks',     icon:'⚡', label:'Hook Ideas'    },
+  { id:'shotlist',  icon:'📸', label:'Shot List'     },
+];
+
+function setMode(m) {
+  mode = m;
+  // toggle buttons
+  document.getElementById('btn-study').className   = 'mode-btn' + (m==='study'   ? ' active-study'   : '');
+  document.getElementById('btn-content').className = 'mode-btn' + (m==='content' ? ' active-content' : '');
+  // CSS vars
+  const r = document.documentElement.style;
+  if (m === 'study') {
+    r.setProperty('--pri',   'var(--s-pri)');
+    r.setProperty('--dark',  'var(--s-dark)');
+    r.setProperty('--light', 'var(--s-light)');
+    r.setProperty('--mbord', 'var(--s-border)');
+  } else {
+    r.setProperty('--pri',   'var(--c-pri)');
+    r.setProperty('--dark',  'var(--c-dark)');
+    r.setProperty('--light', 'var(--c-light)');
+    r.setProperty('--mbord', 'var(--c-border)');
+  }
+  // panel label
+  document.getElementById('ap-mode-label').textContent = m === 'study' ? '🌿 Study Node' : '🎨 Content Node';
+  // rebuild action grid if panel open
+  if (panelOpen) buildActionGrid(panelNodeId);
+  if (tree) renderMap();
+}
+
+/* ──────────────────────────────────────
+   LAYOUT
+─────────────────────────────────────── */
+function layout() {
+  const svg = document.getElementById('map-svg');
+  const W = svg.clientWidth || 900, H = svg.clientHeight || 600;
+  tree.x = W / 2; tree.y = H - 80; tree.depth = 0;
+  layoutKids(tree, Math.PI, 2*Math.PI, 148, 1);
+}
+function layoutKids(node, minA, maxA, len, depth) {
+  const n = node.children.length; if (!n) return;
+  if (maxA - minA < 0.01) { minA -= 0.4; maxA += 0.4; }
+  node.children.forEach((c, i) => {
+    c.depth = depth;
+    const t = n === 1 ? 0.5 : i / (n - 1);
+    const a = minA + t * (maxA - minA);
+    c.x = node.x + len * Math.cos(a);
+    c.y = node.y + len * Math.sin(a);
+    const half = Math.max((maxA - minA) / n * 0.85, 0.22);
+    layoutKids(c, a - half, a + half, len * 0.68, depth + 1);
+  });
+}
+
+/* ──────────────────────────────────────
+   RENDER
+─────────────────────────────────────── */
+function colorSet(depth) {
+  if (mode === 'study') {
+    const s = [
+      { fill:'#6dc49a', stroke:'#3a7a5c', text:'#fff'     },
+      { fill:'#96d9b8', stroke:'#6dc49a', text:'#1e4a35'  },
+      { fill:'#bce9d3', stroke:'#96d9b8', text:'#1e4a35'  },
+      { fill:'#ddf4eb', stroke:'#bce9d3', text:'#2d5e45'  },
+      { fill:'#ede0f8', stroke:'#c9a8e8', text:'#3d2a5a'  },
+    ];
+    return s[Math.min(depth, 4)];
+  } else {
+    const c = [
+      { fill:'#f4a4b8', stroke:'#be4e6a', text:'#fff'     },
+      { fill:'#f8c2d0', stroke:'#f4a4b8', text:'#6e2036'  },
+      { fill:'#fbd9e4', stroke:'#f8c2d0', text:'#6e2036'  },
+      { fill:'#fdeef4', stroke:'#fbd9e4', text:'#6e2036'  },
+      { fill:'#ede0f8', stroke:'#c9a8e8', text:'#3d2a5a'  },
+    ];
+    return c[Math.min(depth, 4)];
+  }
+}
+
+function svgEl(tag, attrs = {}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, v));
+  return el;
+}
+
+function renderMap() {
+  if (!tree) return;
+  layout();
+  document.getElementById('edges-g').innerHTML = '';
+  document.getElementById('nodes-g').innerHTML = '';
+  renderNode(tree, null);
+  refreshList();
+  refreshParentSel();
+  document.getElementById('empty').classList.add('gone');
+  // show click hint briefly
+  const hp = document.getElementById('hint-pill');
+  hp.classList.remove('gone');
+  setTimeout(() => hp.classList.add('gone'), 3000);
+}
+
+function renderNode(node, parent) {
+  if (parent) drawBranch(parent, node);
+  drawNode(node);
+  node.children.forEach(c => renderNode(c, node));
+}
+
+function drawBranch(p, c) {
+  const eg = document.getElementById('edges-g');
+  const w = Math.max(10 - c.depth * 2.2, 1.8);
+  const col = c.depth <= 1 ? '#9e6641' : c.depth <= 2 ? '#be8b61' : '#d4a87a';
+  const dx = c.x-p.x, dy = c.y-p.y;
+  const path = svgEl('path', {
+    d: `M${p.x} ${p.y} C${p.x+dx*.15} ${p.y+dy*.45},${c.x-dx*.15} ${c.y-dy*.45},${c.x} ${c.y}`,
+    stroke: col, 'stroke-width': w, fill:'none', 'stroke-linecap':'round'
+  });
+  eg.appendChild(path);
+  // leaf clusters on tips
+  if (!c.children.length && c.depth >= 2) drawLeaves(c);
+}
+
+function drawLeaves(node) {
+  const eg = document.getElementById('edges-g');
+  const cols = ['#bce9d3','#f8c2d0','#ede0f8','#ddf4eb','#fdeef4'];
+  [-0.6,0,0.6,-1.1,1.1].forEach((a,i) => {
+    const lx = node.x + Math.cos(a)*(8+Math.random()*4);
+    const ly = node.y + Math.sin(a)*(8+Math.random()*4) - 6;
+    eg.appendChild(svgEl('ellipse',{cx:lx,cy:ly,rx:5,ry:3,fill:cols[i%cols.length],opacity:.55,transform:`rotate(${a*57},${lx},${ly})`}));
+  });
+}
+
+function wrapText(t, max=11) {
+  const words = t.split(' ');
+  if (words.length<=1 || t.length<=max) return [t];
+  const m = Math.ceil(words.length/2);
+  return [words.slice(0,m).join(' '), words.slice(m).join(' ')];
+}
+
+function drawNode(node) {
+  const ng = document.getElementById('nodes-g');
+  const col = colorSet(node.depth);
+  const isRoot = node.depth===0;
+  const r = isRoot ? 46 : Math.max(32-node.depth*4, 20);
+  const isSel = node.id===selId;
+  const isPanelNode = node.id===panelNodeId && panelOpen;
+
+  const g = svgEl('g',{'data-id':node.id, style:'cursor:pointer'});
+
+  // trunk for root
+  if (isRoot) {
+    g.appendChild(svgEl('rect',{x:node.x-12,y:node.y+18,width:24,height:34,rx:7,fill:'#9e6641',opacity:.65}));
+  }
+
+  // selection halo
+  if (isSel || isPanelNode) {
+    const priColor = mode==='study'?'#6dc49a':'#f4a4b8';
+    g.appendChild(svgEl('circle',{cx:node.x,cy:node.y,r:r+9,fill:'none',stroke:priColor,'stroke-width':'2.5',opacity:'.7','stroke-dasharray':'5 3'}));
+  }
+
+  // shadow + circle
+  g.appendChild(svgEl('circle',{cx:node.x+2,cy:node.y+4,r,fill:'rgba(100,60,80,.1)'}));
+  g.appendChild(svgEl('circle',{cx:node.x,cy:node.y,r,fill:col.fill,stroke:col.stroke,'stroke-width':isSel?'3':'2',filter:isRoot?'url(#glow-f)':'url(#soft-sh)'}));
+  g.appendChild(svgEl('ellipse',{cx:node.x-r*.3,cy:node.y-r*.3,rx:r*.3,ry:r*.2,fill:'rgba(255,255,255,.38)'}));
+
+  // text
+  const lines = wrapText(node.text, isRoot?14:10);
+  const fs = isRoot ? 13 : Math.max(12-node.depth, 10);
+  const lh = fs+2;
+  const ty = node.y - (lines.length-1)*lh/2;
+  lines.forEach((ln,i) => {
+    const t = svgEl('text',{x:node.x,y:ty+i*lh,'text-anchor':'middle','dominant-baseline':'middle','font-family':'Nunito, sans-serif','font-weight':'800','font-size':fs,fill:col.text});
+    t.textContent = ln;
+    g.appendChild(t);
+  });
+
+  // flower on root
+  if (isRoot) {
+    const fl = svgEl('text',{x:node.x,y:node.y-r-10,'text-anchor':'middle','font-size':'15'});
+    fl.textContent = mode==='study'?'🌿':'🎀';
+    g.appendChild(fl);
+  }
+
+  g.addEventListener('click', e=>{ e.stopPropagation(); selectNode(node.id); });
+  g.addEventListener('contextmenu', e=>{ e.preventDefault(); openCtx(e,node.id); });
+  ng.appendChild(g);
+}
+
+/* ──────────────────────────────────────
+   UI ACTIONS
+─────────────────────────────────────── */
+function plantTree() {
+  const val = document.getElementById('root-input').value.trim();
+  if (!val) { toast('Type a topic first! 🌸'); return; }
+  nodeId = 0; tree = mkNode(val); selId = tree.id;
+  ['add-sec','ai-sec','nodes-sec'].forEach(id=>document.getElementById(id).style.display='block');
+  renderMap(); resetView();
+  toast('🌱 Your map is sprouting!');
+}
+
+function addIdea() {
+  if (!tree) return;
+  const val = document.getElementById('idea-input').value.trim();
+  if (!val) { toast('Type an idea first 💭'); return; }
+  const pid = parseInt(document.getElementById('parent-sel').value);
+  const parent = find(tree, pid); if (!parent) return;
+  const node = mkNode(val, pid);
+  parent.children.push(node);
+  document.getElementById('idea-input').value = '';
+  selId = node.id; renderMap();
+  toast(`✿ "${val}" added!`);
+}
+
+function selectNode(id) {
+  selId = id;
+  const sel = document.getElementById('parent-sel');
+  if (sel) sel.value = id;
+  renderMap();
+  // open action panel
+  openPanel(id);
+}
+
+function refreshParentSel() {
+  const sel = document.getElementById('parent-sel');
+  sel.innerHTML = all(tree).map(n=>`<option value="${n.id}" ${n.id===selId?'selected':''}>${'·'.repeat(n.depth*2)} ${n.text.length>26?n.text.slice(0,25)+'…':n.text}</option>`).join('');
+}
+
+function refreshList() {
+  document.getElementById('node-list').innerHTML = all(tree).map(n=>`
+    <div class="node-item ${n.id===selId?'sel':''}" onclick="selectNode(${n.id})">
+      <div class="node-dot ${n.depth===0?'root':''}"></div>
+      <span class="node-text">${n.text}</span>
+      ${n.depth>0?`<button class="node-del" onclick="event.stopPropagation();delById(${n.id})">✕</button>`:''}
+    </div>`).join('');
+}
+
+function delById(id) {
+  if (!tree||id===tree.id) return;
+  del(tree,id);
+  if (selId===id) selId=tree.id;
+  if (panelNodeId===id) closePanel();
+  renderMap(); toast('Node removed 🍃');
+}
+
+/* ──────────────────────────────────────
+   ACTION PANEL
+─────────────────────────────────────── */
+function openPanel(nodeId) {
+  const node = find(tree, nodeId); if (!node) return;
+  panelNodeId = nodeId; panelOpen = true;
+
+  document.getElementById('ap-node-name').textContent  = node.text;
+  document.getElementById('ap-node-emoji').textContent = node.depth===0?'🌳':mode==='study'?'📚':'🎬';
+  document.getElementById('ap-mode-label').textContent = mode==='study'?'🌿 Study Node':'🎨 Content Node';
+
+  buildActionGrid(nodeId);
+  setOutputEmpty();
+  document.getElementById('action-panel').classList.add('open');
+}
+
+function closePanel() {
+  panelOpen = false; panelNodeId = null;
+  document.getElementById('action-panel').classList.remove('open');
+  if (tree) renderMap();
+}
+
+function buildActionGrid(nid) {
+  const acts = mode==='study'?STUDY_ACTIONS:CONTENT_ACTIONS;
+  document.getElementById('action-grid').innerHTML = acts.map(a=>`
+    <button class="act-btn" id="act-${a.id}" onclick="runAction('${a.id}','${nid}')">
+      ${a.icon} ${a.label}
+    </button>`).join('');
+}
+
+async function runAction(actionId, nid) {
+  const node = find(tree, parseInt(nid)); if (!node) return;
+  const topic = tree?.text || '';
+
+  // highlight button
+  document.querySelectorAll('.act-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('act-'+actionId)?.classList.add('active');
+
+  setOutputLoading();
+
+  const endpointMap = {
+    explain:'study/explain', quiz:'study/quiz', flashcard:'study/flashcards', connect:'study/connect',
+    script:'content/script', moodboard:'content/moodboard', hooks:'content/hooks', shotlist:'content/shotlist',
+  };
+
+  try {
+    const res  = await fetch(`/api/${endpointMap[actionId]}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:node.text,topic})});
+    const data = await res.json();
+    setOutputText(data.success ? data.text : '😔 Lumi tripped! Try again.');
+  } catch {
+    setOutputText('⚠️ Could not reach the server. Is app.py running?');
+  }
+}
+
+function setOutputEmpty()   { const o=document.getElementById('ap-output'); o.className='ap-output'; o.innerHTML='<div class="ap-empty">Pick an action to sprout this node! 🌱</div>'; }
+function setOutputLoading() { const o=document.getElementById('ap-output'); o.className='ap-output loading'; o.innerHTML=`<div class="bloom-spin" style="font-size:28px">✿</div><div class="load-txt" style="font-size:13px">Lumi is sprouting…</div>`; }
+function setOutputText(txt) { const o=document.getElementById('ap-output'); o.className='ap-output'; o.innerHTML=`<div style="white-space:pre-wrap">${txt}</div>`; }
+
+/* ──────────────────────────────────────
+   AI sidebar features
+─────────────────────────────────────── */
+async function aiGenerate() {
+  if (!tree) return;
+  const target = find(tree, selId??tree.id); if (!target) return;
+  showAiLoad(true);
+  try {
+    const res  = await fetch('/api/generate-ideas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:target.text,existing:target.children.map(c=>c.text),mode})});
+    const data = await res.json();
+    if (data.success) showChips(data.ideas, target.id);
+    else toast('AI hiccup — try again 🌸');
+  } catch { toast('Server not reachable 🌐'); }
+  showAiLoad(false);
+}
+
+async function aiExpand() {
+  if (!tree) return;
+  const target = find(tree, selId??tree.id); if (!target) return;
+  const parent = target.parentId!=null?find(tree,target.parentId):null;
+  showAiLoad(true);
+  try {
+    const res  = await fetch('/api/expand-node',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:target.text,parent:parent?parent.text:'',depth:target.depth,mode})});
+    const data = await res.json();
+    if (data.success) showChips(data.ideas, target.id);
+    else toast('AI hiccup — try again 🌸');
+  } catch { toast('Server not reachable 🌐'); }
+  showAiLoad(false);
+}
+
+async function aiRefine() {
+  if (!tree||selId==null) { toast('Select a node first! 🌸'); return; }
+  const target = find(tree,selId); if (!target||target.depth===0) { toast('Select a branch node ✿'); return; }
+  const parent = target.parentId!=null?find(tree,target.parentId):null;
+  showAiLoad(true);
+  try {
+    const res  = await fetch('/api/refine-idea',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea:target.text,parent:parent?parent.text:''})});
+    const data = await res.json();
+    if (data.success) { target.text=data.refined; renderMap(); toast(`✨ Refined: "${data.refined}"`); }
+    else toast('AI hiccup 🌸');
+  } catch { toast('Server not reachable 🌐'); }
+  showAiLoad(false);
+}
+
+function showChips(ideas, pid) {
+  const panel = document.getElementById('sugg-panel');
+  document.getElementById('chips').innerHTML = ideas.map(idea=>`
+    <span class="chip" onclick="addChip(${pid},'${idea.replace(/'/g,"\\'")}',this)">＋ ${idea}</span>`).join('');
+  panel.classList.add('vis');
+}
+
+function addChip(pid, text, el) {
+  const parent = find(tree, pid); if (!parent) return;
+  const node = mkNode(text, pid);
+  parent.children.push(node);
+  selId = node.id; renderMap();
+  el.classList.add('used'); el.textContent = '✓ '+text;
+  toast(`✿ "${text}" added!`);
+}
+
+
+
+/* ──────────────────────────────────────
+   CONTEXT MENU
+─────────────────────────────────────── */
+function openCtx(e,id) { ctxId=id; const c=document.getElementById('ctx'); c.style.left=e.clientX+'px'; c.style.top=e.clientY+'px'; c.classList.add('vis'); }
+document.addEventListener('click',()=>document.getElementById('ctx').classList.remove('vis'));
+function ctxChild()  { if(ctxId!=null){selectNode(ctxId);document.getElementById('idea-input').focus();} }
+function ctxExpand() { if(ctxId!=null){selectNode(ctxId);aiExpand();} }
+function ctxRefine() { if(ctxId!=null){selectNode(ctxId);aiRefine();} }
+function ctxSprout() { if(ctxId!=null){openPanel(ctxId);} }
+function ctxDel()    { if(ctxId!=null) delById(ctxId); }
+
+/* ──────────────────────────────────────
+   PAN & ZOOM
+─────────────────────────────────────── */
+const mapSvg = document.getElementById('map-svg');
+const panG   = document.getElementById('pan-g');
+
+mapSvg.addEventListener('mousedown',e=>{
+  if(e.target===mapSvg||e.target===panG||e.target.id==='edges-g'||e.target.id==='nodes-g'){
+    panning=true; px0=e.clientX-panX; py0=e.clientY-panY; mapSvg.style.cursor='grabbing';
+  }
+});
+document.addEventListener('mousemove',e=>{ if(!panning)return; panX=e.clientX-px0; panY=e.clientY-py0; applyXform(); });
+document.addEventListener('mouseup',()=>{ panning=false; mapSvg.style.cursor='grab'; });
+mapSvg.addEventListener('wheel',e=>{ e.preventDefault(); doZoom(-e.deltaY*.001,e.clientX,e.clientY); },{passive:false});
+
+function doZoom(d,cx,cy) {
+  const old=scale; scale=Math.max(.3,Math.min(3,scale+d));
+  if(cx!=null){ const r=mapSvg.getBoundingClientRect(); const mx=cx-r.left,my=cy-r.top; panX=mx-(mx-panX)*(scale/old); panY=my-(my-panY)*(scale/old); }
+  applyXform();
+}
+function applyXform() { panG.setAttribute('transform',`translate(${panX},${panY}) scale(${scale})`); }
+function resetView()  { panX=0;panY=0;scale=1;applyXform(); }
+
+/* ──────────────────────────────────────
+   MISC
+─────────────────────────────────────── */
+function showAiLoad(v) { document.getElementById('ai-load').classList.toggle('gone',!v); }
+
+let toastTid;
+function toast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTid); toastTid=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function clearMap() {
+  if(!tree)return;
+  if(!confirm('Clear the entire map? This can\'t be undone.'))return;
+  tree=null; selId=null; nodeId=0;
+  document.getElementById('edges-g').innerHTML='';
+  document.getElementById('nodes-g').innerHTML='';
+  document.getElementById('empty').classList.remove('gone');
+  ['add-sec','ai-sec','nodes-sec'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('sugg-panel').classList.remove('vis');
+  closePanel();
+  toast('Canvas cleared 🌿');
+}
+
+window.addEventListener('resize',()=>{ if(tree)renderMap(); });
+
+// click canvas to deselect
+mapSvg.addEventListener('click',e=>{
+  if(['map-svg','pan-g','edges-g','nodes-g'].includes(e.target.id)||e.target===mapSvg){
+    selId=null; if(tree)renderMap();
+  }
+});
+</script>
 </body>
 </html>
