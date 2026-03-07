@@ -1,30 +1,22 @@
 # ╔══════════════════════════════════════════════════╗
 # ║  Sprout — The Aesthetic Visual Mapping OS        ║
-# ║  Backend: Flask + Google GenAI (new SDK)         ║
+# ║  Backend: Flask + Groq                           ║
 # ╚══════════════════════════════════════════════════╝
 
 import os
 import json
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
-
-# debug: list available types to diagnose missing TextPrompt
-print("[DEBUG] google.genai.types members:", [a for a in dir(types) if not a.startswith("_")])
+from groq import Groq
 
 load_dotenv()
 
 app = Flask(__name__)
-
-# This is a random secret used to secure sessions
 app.secret_key = os.environ.get("SECRET_KEY", "sprout-dev-secret-key")
 
-# THIS is where your GEMINI_API_KEY is used
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-
-# ✅ With the new google-genai SDK, do NOT use "models/" prefix
-MODEL = "gemini-1.5-flash"
+# ✅ Groq — free, no region restrictions
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+MODEL  = "llama-3.3-70b-versatile"   # fast, free, very capable
 
 SYSTEM = (
     "You are Lumi, a warm and creative AI companion inside Sprout, "
@@ -36,23 +28,15 @@ SYSTEM = (
 #  HELPERS
 # ════════════════════════════════════════
 def ask(prompt, max_tokens=400):
-    # build a small chat-style prompt sequence; the SDK serializes to
-    # JSON fields named `content` rather than `contents`, and we avoid
-    # the now‑unsupported `systemInstruction` field by embedding the
-    # system text in the first prompt element.
-    conversation = [
-        types.TextPrompt(text=SYSTEM, role="SYSTEM"),
-        types.TextPrompt(text=prompt, role="USER"),
-    ]
-
-    response = client.models.generate_content(
+    response = client.chat.completions.create(
         model=MODEL,
-        content=conversation,
-        config=types.GenerateContentConfig(
-            max_output_tokens=max_tokens,
-        ),
+        messages=[
+            {"role": "system", "content": SYSTEM},
+            {"role": "user",   "content": prompt},
+        ],
+        max_tokens=max_tokens,
     )
-    return response.text.strip()
+    return response.choices[0].message.content.strip()
 
 
 def parse_json(text):
