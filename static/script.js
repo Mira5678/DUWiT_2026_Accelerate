@@ -646,3 +646,67 @@ svg.addEventListener('click', e => {
     if (tree) renderMap();
   }
 });
+
+
+async function saveBoard() {
+  if (!tree) { showToast('Nothing to save yet! 🌱'); return; }
+
+  try {
+    const res = await fetch('/api/boards/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: tree.text,
+        mode:  'study',
+        nodes: tree
+      })
+    });
+    const data = await res.json();
+    if (data.success) showToast('💾 Board saved!');
+    else showToast('Save failed 🌧 Try again');
+  } catch {
+    showToast('Could not reach server 🌐');
+  }
+}
+
+function toggleBoardsPanel() {
+  document.getElementById('boards-panel').classList.toggle('open');
+  loadBoards();
+}
+
+async function loadBoards() {
+  const res = await fetch('/api/boards');
+  const data = await res.json();
+  const list = document.getElementById('boards-list');
+
+  if (!data.boards.length) {
+    list.innerHTML = '<p style="color:#9aaa88;font-size:0.85rem;padding:8px">No saved boards yet.</p>';
+    return;
+  }
+
+  list.innerHTML = data.boards.map(b => `
+    <div class="board-item" onclick="loadBoard('${b.id}')">
+      <div class="board-item-name">${b.topic}</div>
+      <div class="board-item-meta">${b.mode} · ${b.mode}</div>
+    </div>
+  `).join('');
+}
+
+async function loadBoard(id) {
+  const res = await fetch(`/api/boards/${id}`);
+  const data = await res.json();
+  if (data.success) {
+    tree = data.board.nodes;
+    selectedNodeId = tree.id;
+    nodeIdCounter = Math.max(...getAllNodes(tree).map(n => n.id)) + 1;
+    renderMap();
+    document.getElementById('add-section').style.display    = 'block';
+    document.getElementById('ai-section').style.display     = 'block';
+    document.getElementById('nodes-section').style.display  = 'block';
+    toggleBoardsPanel();
+    showToast('🌿 Board loaded!');
+  } else {
+    showToast('Could not load board 🌧');
+  }
+}
+

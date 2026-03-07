@@ -457,6 +457,8 @@
     <div class="sec-label" id="sl-topic">✦ Central Topic</div>
     <input type="text" id="root-input" placeholder="e.g. OOP, My Vlog Idea…"/>
     <button class="btn btn-primary btn-full" onclick="plantTree()">🌱 Sprout Map</button>
+    <button class="btn btn-primary btn-full" onclick="saveBoard()">💾 Save Board</button>
+    <button class="btn btn-primary btn-full" onclick="toggleBoards()">📋 My Boards</button>
   </div>
 
   <!-- Add idea -->
@@ -573,6 +575,10 @@
 </div>
 
 <div id="toast"></div>
+
+<div id="boards-panel">
+  <div id="boards-list"></div>
+</div>
 
 <!-- ════════════════ SCRIPT ════════════════ -->
 <script>
@@ -1031,7 +1037,6 @@ function addChip(pid, text, el) {
 }
 
 
-
 /* ──────────────────────────────────────
    CONTEXT MENU
 ─────────────────────────────────────── */
@@ -1098,6 +1103,8 @@ mapSvg.addEventListener('click',e=>{
     setSelId(null); if(getTree())renderMap();
   }
 });
+
+
 </script>
 </body>
 </html>

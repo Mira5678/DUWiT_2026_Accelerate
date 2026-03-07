@@ -7,6 +7,8 @@ import os
 import json
 import sqlite3
 import hashlib
+import uuid
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from dotenv import load_dotenv
 from groq import Groq
@@ -17,7 +19,10 @@ app = Flask(__name__)
 import secrets
 app.secret_key = secrets.token_hex(16)  # random every restart = sessions always clear
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+# client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+client = Groq(api_key="your_key_here")
+
+boards_store = {}
 
 # ════════════════════════════════════════
 #  DATABASE
@@ -334,6 +339,52 @@ def content_shotlist():
         return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+# ════════════════════════════════════════
+#  BOARDS SAVE & VIEW
+# ════════════════════════════════════════
+
+@app.route("/api/boards/save", methods=["POST"])
+def save_board():
+    data  = request.json or {}
+    nodes = data.get("nodes", [])
+    topic = data.get("topic", "Untitled")
+    mode  = data.get("mode", "study")
+
+    board_id = str(uuid.uuid4())[:8]
+    boards_store[board_id] = {
+        "id":         board_id,
+        "topic":      topic,
+        "mode":       mode,
+        "nodes":      nodes,
+        "created_at": datetime.utcnow().isoformat()
+    }
+    return jsonify({"success": True, "id": board_id})
+
+
+@app.route("/api/boards", methods=["GET"])
+def list_boards():
+    summaries = [
+        {k: v for k, v in b.items() if k != "nodes"}
+        for b in boards_store.values()
+    ]
+    return jsonify({"success": True, "boards": summaries})
+
+
+@app.route("/api/boards/<board_id>", methods=["GET"])
+def get_board(board_id):
+    board = boards_store.get(board_id)
+    if not board:
+        return jsonify({"success": False, "error": "Board not found"}), 404
+    return jsonify({"success": True, "board": board})
+
+
+@app.route("/api/boards/<board_id>", methods=["DELETE"])
+def delete_board(board_id):
+    if board_id not in boards_store:
+        return jsonify({"success": False, "error": "Board not found"}), 404
+    del boards_store[board_id]
+    return jsonify({"success": True})
 
 
 # ════════════════════════════════════════
