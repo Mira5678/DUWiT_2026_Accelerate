@@ -372,7 +372,7 @@
     let selectedMode = null;
 
     // Greet with stored name if available
-    const name = sessionStorage.getItem('sprout_user') || '';
+    const name = '{{ session.get("user", {}).get("name", "") }}';
     if (name) document.getElementById('username-chip').textContent = `Hey, ${name}! 🌸`;
 
     function selectMode(mode) {
@@ -382,12 +382,16 @@
       document.getElementById('card-' + mode).classList.add('selected');
     }
 
-    function goMode(mode) {
+    async function goMode(mode) {
       selectMode(mode);
-      // Store mode choice and redirect
-      sessionStorage.setItem('sprout_mode', mode);
-      // Brief visual feedback then redirect
-      setTimeout(() => { window.location.href = '/?mode=' + mode; }, 320);
+      try {
+        await fetch('/api/set-mode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode })
+        });
+      } catch { /* still redirect even if fetch fails */ }
+      window.location.href = '/';
     }
   </script>
 </body>
