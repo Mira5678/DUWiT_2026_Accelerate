@@ -5,6 +5,8 @@
 
 import os
 import json
+import sqlite3
+import hashlib
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from dotenv import load_dotenv
 from groq import Groq
@@ -12,11 +14,33 @@ from groq import Groq
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "sprout-dev-secret-key")
+import secrets
+app.secret_key = secrets.token_hex(16)  # random every restart = sessions always clear
 
-# ✅ Groq — free, no region restrictions
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-MODEL  = "llama-3.3-70b-versatile"   # fast, free, very capable
+
+# ════════════════════════════════════════
+#  DATABASE
+# ════════════════════════════════════════
+DB_PATH = os.path.join(os.path.dirname(__file__), "sprout.db")
+
+def init_db():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                name     TEXT    NOT NULL,
+                email    TEXT    UNIQUE NOT NULL,
+                password TEXT    NOT NULL
+            )
+        """)
+        conn.commit()
+
+def hash_pw(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+init_db()
+MODEL  = "llama-3.3-70b-versatile"
 
 SYSTEM = (
     "You are Lumi, a warm and creative AI companion inside Sprout, "
@@ -83,27 +107,42 @@ def logout():
 @app.route("/api/login", methods=["POST"])
 def api_login():
     data     = request.json or {}
-    email    = data.get("email", "").strip()
+    email    = data.get("email", "").strip().lower()
     password = data.get("password", "")
-    if email and password:
-        name = email.split("@")[0].capitalize()
-        session["user"] = {"email": email, "name": name}
+    if not email or not password:
+        return jsonify({"success": False, "error": "Please fill in all fields"}), 400
+    with sqlite3.connect(DB_PATH) as conn:
+        row = conn.execute(
+            "SELECT name, email FROM users WHERE email=? AND password=?",
+            (email, hash_pw(password))
+        ).fetchone()
+    if row:
+        session["user"] = {"email": row[1], "name": row[0]}
         session.pop("mode", None)
-        return jsonify({"success": True, "user": {"email": email, "name": name}})
-    return jsonify({"success": False, "error": "Invalid credentials"}), 401
+        return jsonify({"success": True, "user": {"email": row[1], "name": row[0]}})
+    return jsonify({"success": False, "error": "Wrong email or password"}), 401
 
 
 @app.route("/api/signup", methods=["POST"])
 def api_signup():
     data     = request.json or {}
     name     = data.get("name", "").strip()
-    email    = data.get("email", "").strip()
+    email    = data.get("email", "").strip().lower()
     password = data.get("password", "")
-    if name and email and password:
+    if not name or not email or not password:
+        return jsonify({"success": False, "error": "Please fill in all fields"}), 400
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.execute(
+                "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+                (name, email, hash_pw(password))
+            )
+            conn.commit()
         session["user"] = {"email": email, "name": name}
         session.pop("mode", None)
         return jsonify({"success": True, "user": {"email": email, "name": name}})
-    return jsonify({"success": False, "error": "Missing fields"}), 400
+    except sqlite3.IntegrityError:
+        return jsonify({"success": False, "error": "Email already registered — try logging in!"}), 409
 
 
 @app.route("/api/set-mode", methods=["POST"])
@@ -196,7 +235,6 @@ def study_explain():
                   "Use 1-2 emojis. Under 80 words.")
         return jsonify({"success": True, "text": ask(prompt, max_tokens=200)})
     except Exception as e:
-        print(f"[study/explain error] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -210,7 +248,6 @@ def study_quiz():
                   "After each add a blank line then '✅ Answer: ...'. Friendly tone. Under 200 words.")
         return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
     except Exception as e:
-        print(f"[study/quiz error] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -224,7 +261,6 @@ def study_flashcards():
                   "Format: 🃏 FRONT: [question]\n🌸 BACK: [answer]\n\nUnder 200 words.")
         return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
     except Exception as e:
-        print(f"[study/flashcards error] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -239,7 +275,6 @@ def study_connect():
                   "2-3 short paragraphs with emojis. Under 150 words.")
         return jsonify({"success": True, "text": ask(prompt, max_tokens=350)})
     except Exception as e:
-        print(f"[study/connect error] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -257,7 +292,6 @@ def content_script():
                   "Format:\n🎬 HOOK (0-3s):\n📖 MIDDLE (3-25s):\n✨ CTA (25-30s):\nUnder 200 words.")
         return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
     except Exception as e:
-        print(f"[content/script error] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -273,7 +307,6 @@ def content_moodboard():
                   "💡 LIGHTING MOOD\n🎥 CAMERA STYLE\n✨ OVERALL VIBE\nUnder 220 words.")
         return jsonify({"success": True, "text": ask(prompt, max_tokens=450)})
     except Exception as e:
-        print(f"[content/moodboard error] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -287,7 +320,6 @@ def content_hooks():
                   "Label each: Curiosity/Shock/Relatability/FOMO/Humor. Under 200 words.")
         return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
     except Exception as e:
-        print(f"[content/hooks error] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -301,7 +333,6 @@ def content_shotlist():
                   "5 shots: 📽️ Shot type | 🎯 Subject | ⏱️ Duration | 💭 Why it works. Under 200 words.")
         return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
     except Exception as e:
-        print(f"[content/shotlist error] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
