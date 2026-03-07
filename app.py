@@ -10,10 +10,11 @@
 
 import os
 import json
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 import anthropic
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "sprout-dev-secret-key")
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 MODEL = "claude-haiku-4-5-20251001"
 
@@ -44,19 +45,37 @@ def parse_json(text):
 
 @app.route("/")
 def index():
+    # Must be logged in AND have chosen a mode
+    if not session.get("user"):
+        return redirect(url_for("login"))
+    if not session.get("mode"):
+        return redirect(url_for("mode_select"))
     return render_template("index.html")
 
 @app.route("/login")
 def login():
+    # Already logged in? Skip to mode select or app
+    if session.get("user"):
+        if session.get("mode"):
+            return redirect(url_for("index"))
+        return redirect(url_for("mode_select"))
     return render_template("login.html")
 
 @app.route("/mode-select")
 def mode_select():
+    # Must be logged in to choose a mode
+    if not session.get("user"):
+        return redirect(url_for("login"))
     return render_template("mode_select.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 
 # ════════════════════════════════════════
-#  AUTH ROUTES  (stub — wire up your DB)
+#  AUTH ROUTES
 # ════════════════════════════════════════
 
 @app.route("/api/login", methods=["POST"])
@@ -66,6 +85,8 @@ def api_login():
     password = data.get("password", "")
     if email and password:
         name = email.split("@")[0].capitalize()
+        session["user"] = {"email": email, "name": name}
+        session.pop("mode", None)  # clear any old mode choice
         return jsonify({"success": True, "user": {"email": email, "name": name}})
     return jsonify({"success": False, "error": "Invalid credentials"}), 401
 
@@ -77,8 +98,20 @@ def api_signup():
     email    = data.get("email", "").strip()
     password = data.get("password", "")
     if name and email and password:
+        session["user"] = {"email": email, "name": name}
+        session.pop("mode", None)
         return jsonify({"success": True, "user": {"email": email, "name": name}})
     return jsonify({"success": False, "error": "Missing fields"}), 400
+
+
+@app.route("/api/set-mode", methods=["POST"])
+def api_set_mode():
+    data = request.json or {}
+    mode = data.get("mode", "")
+    if mode in ("study", "content"):
+        session["mode"] = mode
+        return jsonify({"success": True})
+    return jsonify({"success": False, "error": "Invalid mode"}), 400
 
 
 # ════════════════════════════════════════
