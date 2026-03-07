@@ -1,22 +1,20 @@
 # ╔══════════════════════════════════════════════════╗
 # ║  Sprout — The Aesthetic Visual Mapping OS        ║
-# ║  Backend: Flask + Anthropic Claude               ║
+# ║  Backend: Flask + Google Generative AI           ║
 # ╚══════════════════════════════════════════════════╝
-#
-# Setup:
-#   pip install flask anthropic
-#   export ANTHROPIC_API_KEY=your_key_here
-#   python app.py  →  http://localhost:5000
 
 import os
 import json
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
-import anthropic
+from dotenv import load_dotenv
+import google.generativeai as genai
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "sprout-dev-secret-key")
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-MODEL = "claude-haiku-4-5-20251001"
+genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+MODEL = genai.GenerativeModel("gemini-pro")
 
 
 # ════════════════════════════════════════
@@ -25,11 +23,13 @@ MODEL = "claude-haiku-4-5-20251001"
 def ask(prompt,
         system="You are Lumi, a warm and creative AI companion inside Sprout, a cozy visual mapping app. Be helpful, specific, and delightful.",
         max_tokens=400):
-    msg = client.messages.create(
-        model=MODEL,
-        max_tokens=max_tokens,
-        system=system,
-        messages=[{"role": "user", "content": prompt}]
+    msg = MODEL.generate_content(
+        contents=[
+            {"role": "user", "parts": [prompt]}
+        ],
+        generation_config=genai.GenerationConfig(
+            max_output_tokens=max_tokens
+        )
     )
     return msg.content[0].text.strip()
 
