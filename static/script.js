@@ -49,7 +49,7 @@ function layoutTree() {
   tree.y = H - 90;
   tree.depth = 0;
 
-  layoutChildren(tree, Math.PI, 2 * Math.PI, 148, 1);
+  layoutChildren(tree, 0, Math.PI, 148, 1);
 }
 
 function layoutChildren(node, minA, maxA, branchLen, depth) {
@@ -223,6 +223,37 @@ function drawNodeEl(node) {
     fill: 'rgba(255,255,255,0.4)'
   });
   g.appendChild(shine);
+
+  // Plus button for adding child (not on root)
+  if (!isRoot) {
+    const plusR = 8;
+    const plusX = node.x + r + 15;
+    const plusY = node.y;
+
+    const plusCircle = svgEl('circle', {
+      cx: plusX, cy: plusY, r: plusR,
+      fill: '#FF6B9D', stroke: '#E91E8C', 'stroke-width': '1.5'
+    });
+
+    const plusText = svgEl('text', {
+      x: plusX, y: plusY + 1,
+      'text-anchor': 'middle', 'dominant-baseline': 'middle',
+      'font-family': 'Arial, sans-serif', 'font-weight': 'bold', 'font-size': '12',
+      fill: '#fff'
+    });
+    plusText.textContent = '+';
+
+    // Plus button group for events
+    const plusG = svgEl('g', { style: 'cursor:pointer' });
+    plusG.appendChild(plusCircle);
+    plusG.appendChild(plusText);
+    plusG.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectNode(node.id);
+      document.getElementById('idea-input').focus();
+    });
+    g.appendChild(plusG);
+  }
 
   // Node label (wrapped)
   const lines = wrapText(node.text, isRoot ? 14 : 10);
