@@ -458,49 +458,70 @@
       }
     }
 
-    function doLogin() {
+    async function doLogin() {
       const email = document.getElementById('login-email').value.trim();
       const pw    = document.getElementById('login-pw').value;
       hideErr();
-
-      if (!email || !pw) { showErr('🌸 Please fill in all fields!'); return; }
-      if (!email.includes('@')) { showErr('🌸 That doesn\'t look like a valid email.'); return; }
+      if (!email || !pw)           { showErr('🌸 Please fill in all fields!'); return; }
+      if (!email.includes('@'))    { showErr('🌸 That doesn\'t look like a valid email.'); return; }
 
       setLoading('login-btn', true);
-      // Simulate auth — replace with real fetch('/api/login') call
-      setTimeout(() => {
+      try {
+        const res  = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: pw })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showSuccess('Welcome back! 🌸', `Good to see you, ${data.user.name}!`);
+        } else {
+          showErr('🌸 Wrong email or password — try again!');
+          setLoading('login-btn', false);
+        }
+      } catch {
+        showErr('🌐 Could not reach the server. Is app.py running?');
         setLoading('login-btn', false);
-        showSuccess('Welcome back! 🌸', 'Lumi missed you so much! ✨');
-      }, 1200);
+      }
     }
 
-    function doSignup() {
+    async function doSignup() {
       const name  = document.getElementById('signup-name').value.trim();
       const email = document.getElementById('signup-email').value.trim();
       const pw    = document.getElementById('signup-pw').value;
       hideErr();
-
       if (!name || !email || !pw) { showErr('🌸 Please fill in all fields!'); return; }
       if (!email.includes('@'))   { showErr('🌸 That doesn\'t look like a valid email.'); return; }
       if (pw.length < 6)          { showErr('🌸 Password must be at least 6 characters.'); return; }
 
       setLoading('signup-btn', true);
-      // Simulate auth — replace with real fetch('/api/signup') call
-      setTimeout(() => {
+      try {
+        const res  = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password: pw })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showSuccess(`Hey ${data.user.name}! 🌱`, 'Your garden is ready. Let\'s pick a mode!');
+        } else {
+          showErr('🌸 Something went wrong — try again!');
+          setLoading('signup-btn', false);
+        }
+      } catch {
+        showErr('🌐 Could not reach the server. Is app.py running?');
         setLoading('signup-btn', false);
-        showSuccess(`Hey ${name}! 🌱`, 'Your garden is ready to grow. Let\'s pick a mode!');
-      }, 1400);
+      }
     }
 
     function socialLogin(provider) {
-      // Replace with real OAuth flow
-      showSuccess('Welcome! 🌸', `Signed in with ${provider}. Let's pick your mode!`);
+      // Placeholder — wire up real OAuth here
+      showErr(`🌸 ${provider} login coming soon!`);
     }
 
     function showSuccess(title, sub) {
       document.getElementById('login-form').style.display  = 'none';
       document.getElementById('signup-form').style.display = 'none';
-      document.getElementById('tabs-wrap') && (document.getElementById('tabs-wrap').style.display = 'none');
       document.querySelector('.tabs').style.display = 'none';
       document.getElementById('err-msg').style.display = 'none';
       document.getElementById('card-footer').style.display = 'none';
