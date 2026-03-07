@@ -7,59 +7,56 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Bubblegum+Sans&display=swap" rel="stylesheet"/>
 
+
   <style>
   /* ══════════════════════════════════════
      TOKENS
   ══════════════════════════════════════ */
   :root {
-    /* ── Neutrals (shared) ── */
-    --bg:       #faf7f2;
+    /* neutrals */
+    --bg:       #fdf6f0;
     --card:     #fffdf9;
-    --white:    #fffefb;
-    --ink:      #2e2a24;
-    --muted:    #9e978f;
-    --subtle:   #e8e2da;
-    --border:   #e2dbd2;
+    --white:    #fffcfe;
+    --ink:      #3d3530;
+    --muted:    #a89f9a;
+    --subtle:   #e8e0db;
+    --border:   #ede5e0;
 
-    /* ── Study: Matcha & Milk ── */
-    --s-pri:    #7ab890;       /* matcha green */
-    --s-dark:   #3d6b50;       /* deep matcha */
-    --s-light:  #eef6f1;       /* milk foam */
-    --s-border: #b8d9c4;
-    --s-accent: #c8a96e;       /* oat/honey accent */
-    --s-bg:     #f4f0e8;       /* warm oat bg */
-    --s-grad:   linear-gradient(135deg, #e8f0e4 0%, #f4f0e8 50%, #f0ebe0 100%);
 
-    /* ── Creative: Sakura Pop ── */
-    --c-pri:    #e8729a;       /* cherry blossom */
-    --c-dark:   #a83060;       /* deep sakura */
-    --c-light:  #fdeef4;       /* petal white */
-    --c-border: #f0b8ce;
-    --c-accent: #c9972a;       /* gold */
-    --c-bg:     #fff5f8;       /* sakura bg */
-    --c-grad:   linear-gradient(135deg, #fde8f0 0%, #fff5f8 50%, #fef8ec 100%);
+    /* study — mint sage */
+    --s-pri:    #6dc49a;
+    --s-dark:   #3a7a5c;
+    --s-light:  #e6f7ef;
+    --s-border: #b5e3cb;
 
-    /* ── Active mode vars (swapped by JS) ── */
-    --pri:      var(--s-pri);
-    --dark:     var(--s-dark);
-    --light:    var(--s-light);
-    --mbord:    var(--s-border);
-    --accent:   var(--s-accent);
-    --mode-bg:  var(--s-bg);
-    --mode-grad:var(--s-grad);
+
+    /* content — rose peach */
+    --c-pri:    #f4a4b8;
+    --c-dark:   #be4e6a;
+    --c-light:  #fdeef4;
+    --c-border: #f8ccda;
+
+
+    /* active mode vars (JS swaps these) */
+    --pri:    var(--s-pri);
+    --dark:   var(--s-dark);
+    --light:  var(--s-light);
+    --mbord:  var(--s-border);
   }
+
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+
   body {
     font-family: 'Nunito', sans-serif;
-    background: var(--mode-bg);
+    background: var(--bg);
     color: var(--ink);
     height: 100vh;
     display: flex;
-    overflow: hidden;
-    transition: background .5s;
+    overflow: auto;
   }
+
 
   /* ══════════════════════════════════════
      SIDEBAR
@@ -77,23 +74,24 @@
     transition: border-color .3s;
   }
 
+
   /* Header gradient */
   .sb-header {
     padding: 20px 18px 16px;
-    background: var(--mode-grad);
-    transition: background .5s;
+    background: linear-gradient(135deg, #fde8d0 0%, #f9d5e8 50%, #e8d5f8 100%);
     position: relative;
     overflow: hidden;
     flex-shrink: 0;
   }
   .sb-header::after {
-    content: attr(data-deco);
+    content: '✿';
     position: absolute;
     top: 10px; right: 16px;
     font-size: 26px; opacity: .45;
     animation: sway 3s ease-in-out infinite;
   }
   @keyframes sway { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(8deg)} }
+
 
   .logo {
     font-family: 'Bubblegum Sans', cursive;
@@ -105,6 +103,7 @@
     font-size: 11px; color: var(--muted);
     margin-top: 3px; font-style: italic;
   }
+
 
   /* Mode toggle */
   .mode-toggle {
@@ -125,7 +124,8 @@
     background: transparent; color: var(--muted);
   }
   .mode-btn.active-study  { background: var(--s-pri); color: #fff; box-shadow: 0 2px 8px rgba(61,53,48,.15); }
-  .mode-btn.active-content{ background: var(--c-pri); color: #fff; box-shadow: 0 2px 8px rgba(61,53,48,.18); }
+  .mode-btn.active-content{ background: var(--c-pri); color: #fff; box-shadow: 0 2px 8px rgba(61,53,48,.15); }
+
 
   /* Sections */
   .sb-section {
@@ -140,15 +140,36 @@
     transition: color .3s;
   }
 
+
   /* Inputs */
-  input[type="text"], textarea, select {
+  input[type="text"], input[type="file"], textarea, select {
     width: 100%; padding: 9px 12px;
     border: 1.5px solid var(--border); border-radius: 11px;
     background: var(--white); font-family: 'Nunito', sans-serif;
     font-size: 12.5px; color: var(--ink); outline: none;
     transition: border-color .2s, box-shadow .2s;
   }
-  input:focus, textarea:focus, select:focus {
+  input[type="file"] {
+    cursor: pointer;
+  }
+  input[type="file"]::file-selector-button {
+    padding: 6px 12px;
+    background: var(--light);
+    color: var(--dark);
+    border: 1.5px solid var(--mbord);
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: all .2s;
+  }
+
+
+  input[type="file"]::file-selector-button:hover {
+    background: var(--pri);
+    color: #fff;
+  }
+  input:focus, input[type="file"]:focus, textarea:focus, select:focus {
     border-color: var(--pri);
     box-shadow: 0 0 0 3px var(--light);
   }
@@ -158,8 +179,10 @@
     background-repeat: no-repeat; background-position: right 10px center;
     padding-right: 28px;
   }
-  .input-row { display: flex; gap: 7px; margin-top: 8px; }
-  .input-row input { flex: 1; }
+  .input-row { display: flex; gap: 7px; margin-top: 8px; margin-bottom: 8px; align-items: center; }
+  .input-row input[type="text"], .input-row input[type="file"] { flex: 1; }
+  .input-row button:not([style*="flex: 1"]) { flex-shrink: 0; }
+
 
   /* Buttons */
   .btn {
@@ -183,6 +206,7 @@
   .btn-soft:hover { filter: brightness(.96); }
   .btn-full { width: 100%; margin-top: 7px; padding: 9px; }
 
+
   /* Node list */
   .node-list { max-height: 180px; overflow-y: auto; margin-top: 8px; }
   .node-item {
@@ -204,6 +228,7 @@
   .node-item:hover .node-del { opacity: 1; }
   .node-del:hover { background: #ffe0ec; color: #e11d48; }
 
+
   /* Suggestion chips */
   #sugg-panel { padding: 12px 16px; border-bottom: 1.5px solid var(--border); display: none; }
   #sugg-panel.vis { display: block; }
@@ -216,6 +241,7 @@
   .chip:hover { filter: brightness(.96); transform: translateY(-1px); }
   .chip.used { opacity: .45; cursor: default; pointer-events: none; }
 
+
   /* Spinner */
   .spin {
     display: inline-block; width: 13px; height: 13px;
@@ -225,14 +251,15 @@
   }
   @keyframes spinning { to { transform: rotate(360deg); } }
 
+
   /* ══════════════════════════════════════
      MAIN CANVAS
   ══════════════════════════════════════ */
   #main {
     flex: 1; position: relative; overflow: hidden;
-    background: var(--mode-grad);
-    transition: background .5s;
+    background: radial-gradient(ellipse at 35% 65%, #ffedf6 0%, #fdf6f0 45%, #f0e8fd 100%);
   }
+
 
   /* Floating decorations */
   .petal {
@@ -247,11 +274,13 @@
     100% { transform: translateY(-10vh) rotate(400deg); opacity: 0; }
   }
 
+
   #map-svg {
     width: 100%; height: 100%;
     cursor: grab;
   }
   #map-svg:active { cursor: grabbing; }
+
 
   /* Empty state */
   #empty {
@@ -266,6 +295,7 @@
   .empty-title { font-family: 'Bubblegum Sans', cursive; font-size: 21px; color: var(--ink); margin-bottom: 7px; }
   .empty-sub { font-size: 13px; color: var(--muted); text-align: center; max-width: 240px; line-height: 1.65; }
 
+
   /* AI loading overlay */
   #ai-load {
     position: absolute; inset: 0;
@@ -279,6 +309,7 @@
   #ai-load.gone { display: none; }
   .bloom-spin { font-size: 34px; animation: spinning 1.2s linear infinite; }
   .load-txt { font-family: 'Bubblegum Sans', cursive; font-size: 15px; color: var(--ink); }
+
 
   /* Toolbar */
   #toolbar {
@@ -301,6 +332,7 @@
   .tool-btn:hover { background: var(--light); border-color: var(--pri); transform: scale(1.1); }
   .toolbar-div { width: 1px; height: 22px; background: var(--border); margin: 0 2px; }
 
+
   /* ══════════════════════════════════════
      ACTION PANEL (right slide-in)
   ══════════════════════════════════════ */
@@ -314,6 +346,7 @@
     z-index: 30;
   }
   #action-panel.open { right: 0; }
+
 
   .ap-head {
     padding: 14px 16px 12px;
@@ -339,6 +372,7 @@
   }
   .ap-close:hover { background: var(--subtle); }
 
+
   .ap-actions {
     padding: 12px 14px;
     border-bottom: 1.5px solid var(--border);
@@ -362,6 +396,7 @@
   .act-btn:hover { border-color: var(--pri); background: var(--light); }
   .act-btn.active { background: var(--pri); color: #fff; border-color: var(--pri); }
 
+
   .ap-output {
     flex: 1; overflow-y: auto;
     padding: 14px 16px;
@@ -372,6 +407,7 @@
     align-items: center; justify-content: center; gap: 10px;
   }
   .ap-empty { color: var(--muted); text-align: center; padding-top: 32px; font-weight: 700; }
+
 
 
 
@@ -396,20 +432,22 @@
   .ctx-item:hover { background: var(--light); color: var(--dark); }
   .ctx-item.danger:hover { background: #ffe8ec; color: #e11d48; }
 
+
   /* ══════════════════════════════════════
      TOAST
   ══════════════════════════════════════ */
   #toast {
     position: fixed; top: 18px; left: 50%;
     transform: translateX(-50%) translateY(-80px);
-    background: var(--dark); color: #fff;
+    background: var(--pri); color: #fff;
     padding: 10px 22px; border-radius: 22px;
     font-weight: 800; font-size: 12.5px;
-    box-shadow: 0 5px 20px rgba(61,53,48,.22);
+    box-shadow: 0 5px 20px rgba(61,53,48,.18);
     transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .3s;
     z-index: 999;
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
+
 
   /* ══════════════════════════════════════
      SCROLLBAR
@@ -417,13 +455,14 @@
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
+
   /* ══════════════════════════════════════
      RESPONSIVE HINT
   ══════════════════════════════════════ */
   .hint-pill {
     position: absolute; bottom: 20px; left: 50%;
     transform: translateX(-50%);
-    background: rgba(46,42,36,.75); color: #fff;
+    background: rgba(61,53,48,.72); color: #fff;
     border-radius: 20px; padding: 7px 17px;
     font-size: 11.5px; font-weight: 800;
     pointer-events: none;
@@ -440,17 +479,49 @@
 </head>
 <body>
 
+
 <!-- ════════════════ SIDEBAR ════════════════ -->
 <aside id="sidebar">
   <div class="sb-header">
     <div class="logo">🌱 <em>Sprout</em></div>
     <div class="tagline">grow your ideas beautifully ✦</div>
+      <!-- User greeting and logout -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+      <span style="font-size:12px; font-weight:700; color:#6B2C6D; opacity:0.75;" id="user-greeting">
+      </span>
+      <a href="/logout" style="
+        font-size:11px; font-weight:800;
+        background: rgba(255,255,255,0.55);
+        color: #6B2C6D;
+        border: 1.5px solid rgba(255,255,255,0.7);
+        border-radius: 20px;
+        padding: 4px 12px;
+        text-decoration: none;
+        transition: background 0.2s;
+      " onmouseover="this.style.background='rgba(255,255,255,0.85)'"
+        onmouseout="this.style.background='rgba(255,255,255,0.55)'">
+        Logout
+      </a>
+    </div>
+
+    <script>
+      // Show logged-in user's name in the sidebar
+      const greeting = document.getElementById('user-greeting');
+      if (greeting) {
+        // Flask injects the name via a hidden element or you can use a fetch
+        // Simplest: store name in sessionStorage after login and read it here
+        const name = sessionStorage.getItem('sprout_user_name', data.user.name);
+        if (name) greeting.textContent = `Hi, ${name}! 🌸`;
+      }
+    </script>
+
 
     <div class="mode-toggle">
       <button class="mode-btn active-study" id="btn-study"  onclick="setMode('study')">📚 Study Hub</button>
       <button class="mode-btn"              id="btn-content" onclick="setMode('content')">🎨 Creative Studio</button>
     </div>
   </div>
+
 
   <!-- Central topic -->
   <div class="sb-section">
@@ -459,15 +530,33 @@
     <button class="btn btn-primary btn-full" onclick="plantTree()">🌱 Sprout Map</button>
   </div>
 
+
   <!-- Add idea -->
   <div class="sb-section" id="add-sec" style="display:none">
     <div class="sec-label">✦ Add an Idea</div>
-    <select id="parent-sel"></select>
-    <div class="input-row">
+    <select id="add-type">
+      <option value="text">Text</option>
+      <option value="image">Image</option>
+      <option value="audio">Voice</option>
+    </select>
+    <div id="text-input" class="input-row">
       <input type="text" id="idea-input" placeholder="Type an idea…" onkeydown="if(event.key==='Enter')addIdea()"/>
       <button class="btn btn-primary" onclick="addIdea()">＋</button>
     </div>
+    <div id="image-input" class="input-row" style="display:none">
+      <input type="file" id="image-file" accept="image/*">
+      <button class="btn btn-primary" onclick="addIdea()">＋</button>
+    </div>
+    <div id="audio-input" style="display:none">
+      <div class="input-row">
+        <button id="record-btn" class="btn btn-soft" style="flex: 1;">🎤 Record Voice</button>
+        <button class="btn btn-primary" onclick="addIdea()">＋</button>
+      </div>
+      <audio id="audio-preview" controls style="display:none; width:100%; margin-top:8px;"></audio>
+    </div>
+    <select id="parent-sel"></select>
   </div>
+
 
   <!-- AI tools -->
   <div class="sb-section" id="ai-sec" style="display:none">
@@ -477,11 +566,13 @@
     <button class="btn btn-soft btn-full" onclick="aiRefine()">✏️ Refine Selected Node</button>
   </div>
 
+
   <!-- Suggestion chips -->
   <div id="sugg-panel">
     <div class="sec-label">✦ Suggestions — click to add</div>
     <div class="chips" id="chips"></div>
   </div>
+
 
   <!-- Node list -->
   <div class="sb-section" id="nodes-sec" style="display:none; flex:1">
@@ -490,8 +581,10 @@
   </div>
 </aside>
 
+
 <!-- ════════════════ CANVAS ════════════════ -->
 <main id="main">
+
 
   <!-- Petals -->
   <div class="petal" style="left:8%;animation-duration:20s;animation-delay:0s">🌸</div>
@@ -500,6 +593,7 @@
   <div class="petal" style="left:75%;animation-duration:23s;animation-delay:2s;font-size:13px">✾</div>
   <div class="petal" style="left:42%;animation-duration:30s;animation-delay:7s;font-size:20px">🌺</div>
   <div class="petal" style="left:90%;animation-duration:17s;animation-delay:12s;font-size:12px">✿</div>
+
 
   <!-- SVG mindmap -->
   <svg id="map-svg" xmlns="http://www.w3.org/2000/svg">
@@ -518,6 +612,7 @@
     </g>
   </svg>
 
+
   <!-- Empty state -->
   <div id="empty">
     <div class="empty-icon">🌱</div>
@@ -525,11 +620,13 @@
     <div class="empty-sub">Type a topic in the sidebar and press Sprout Map to grow your beautiful mind tree</div>
   </div>
 
+
   <!-- AI loading -->
   <div id="ai-load" class="gone">
     <div class="bloom-spin">✿</div>
     <div class="load-txt">Lumi is blooming ideas for you…</div>
   </div>
+
 
   <!-- Toolbar -->
   <div id="toolbar">
@@ -540,8 +637,10 @@
     <button class="tool-btn" onclick="clearMap()" title="Clear map">🗑</button>
   </div>
 
+
   <!-- Click hint -->
   <div id="hint-pill" class="hint-pill gone">🌸 Click a node to Sprout it!</div>
+
 
   <!-- Action panel -->
   <div id="action-panel">
@@ -561,7 +660,10 @@
   </div>
 
 
+
+
 </main>
+
 
 <!-- Context menu -->
 <div id="ctx">
@@ -572,40 +674,33 @@
   <div class="ctx-item danger" onclick="ctxDel()">✕ Delete node</div>
 </div>
 
+
 <div id="toast"></div>
+
 
 <!-- ════════════════ SCRIPT ════════════════ -->
 <script>
 /* ──────────────────────────────────────
    STATE
 ─────────────────────────────────────── */
-
-// Per-mode independent map state
-const maps = {
-  study:   { tree: null, nodeId: 0, selId: null },
-  content: { tree: null, nodeId: 0, selId: null },
-};
-
-let ctxId   = null;
-let mode    = 'study';
-let panelOpen   = false;
+let tree = null;
+let nodeId = 0;
+let selId = null;
+let ctxId = null;
+let mode = 'study';   // 'study' | 'content'
+let panelOpen = false;
 let panelNodeId = null;
+
 
 let panX = 0, panY = 0, scale = 1;
 let panning = false, px0 = 0, py0 = 0;
 
-// Getters/setters — always target the current mode's state
-function getTree()   { return maps[mode].tree; }
-function setTree(v)  { maps[mode].tree = v; }
-function getSelId()  { return maps[mode].selId; }
-function setSelId(v) { maps[mode].selId = v; }
-function nextId()    { return maps[mode].nodeId++; }
 
 /* ──────────────────────────────────────
    DATA
 ─────────────────────────────────────── */
-function mkNode(text, parentId = null) {
-  return { id: nextId(), text, parentId, children: [], x: 0, y: 0, depth: 0 };
+function mkNode(content, type = 'text', parentId = null) {
+  return { id: nodeId++, content, type, parentId, children: [], x: 0, y: 0, depth: 0 };
 }
 function find(node, id) {
   if (!node) return null;
@@ -627,6 +722,70 @@ function del(node, id) {
   return false;
 }
 
+
+document.getElementById('add-type').addEventListener('change', function() {
+  const type = this.value;
+  document.getElementById('text-input').style.display = type === 'text' ? 'flex' : 'none';
+  document.getElementById('image-input').style.display = type === 'image' ? 'flex' : 'none';
+  document.getElementById('audio-input').style.display = type === 'audio' ? 'flex' : 'none';
+});
+
+
+let mediaRecorder;
+let audioChunks = [];
+let currentAudio = null;
+
+
+function startRecording() {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.start();
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/wav' });
+        const audioUrl = URL.createObjectURL(blob);
+        document.getElementById('audio-preview').src = audioUrl;
+        document.getElementById('audio-preview').style.display = 'block';
+        blobToBase64(blob).then(base64 => {
+          currentAudio = base64;
+        });
+      };
+      document.getElementById('record-btn').textContent = '⏹️ Stop Recording';
+      document.getElementById('record-btn').onclick = stopRecording;
+    });
+}
+
+
+function stopRecording() {
+  mediaRecorder.stop();
+  document.getElementById('record-btn').textContent = '🎤 Record Voice';
+  document.getElementById('record-btn').onclick = startRecording;
+}
+
+
+function blobToBase64(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.readAsDataURL(blob);
+  });
+}
+
+
+function fileToBase64(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.readAsDataURL(file);
+  });
+}
+
+
+document.getElementById('record-btn').onclick = startRecording;
+
+
 /* ──────────────────────────────────────
    MODE
 ─────────────────────────────────────── */
@@ -643,53 +802,32 @@ const CONTENT_ACTIONS = [
   { id:'shotlist',  icon:'📸', label:'Shot List'     },
 ];
 
+
 function setMode(m) {
   mode = m;
   // toggle buttons
   document.getElementById('btn-study').className   = 'mode-btn' + (m==='study'   ? ' active-study'   : '');
   document.getElementById('btn-content').className = 'mode-btn' + (m==='content' ? ' active-content' : '');
-  // CSS vars — swap full aesthetic
+  // CSS vars
   const r = document.documentElement.style;
   if (m === 'study') {
-    r.setProperty('--pri',       'var(--s-pri)');
-    r.setProperty('--dark',      'var(--s-dark)');
-    r.setProperty('--light',     'var(--s-light)');
-    r.setProperty('--mbord',     'var(--s-border)');
-    r.setProperty('--accent',    'var(--s-accent)');
-    r.setProperty('--mode-bg',   'var(--s-bg)');
-    r.setProperty('--mode-grad', 'var(--s-grad)');
+    r.setProperty('--pri',   'var(--s-pri)');
+    r.setProperty('--dark',  'var(--s-dark)');
+    r.setProperty('--light', 'var(--s-light)');
+    r.setProperty('--mbord', 'var(--s-border)');
   } else {
-    r.setProperty('--pri',       'var(--c-pri)');
-    r.setProperty('--dark',      'var(--c-dark)');
-    r.setProperty('--light',     'var(--c-light)');
-    r.setProperty('--mbord',     'var(--c-border)');
-    r.setProperty('--accent',    'var(--c-accent)');
-    r.setProperty('--mode-bg',   'var(--c-bg)');
-    r.setProperty('--mode-grad', 'var(--c-grad)');
+    r.setProperty('--pri',   'var(--c-pri)');
+    r.setProperty('--dark',  'var(--c-dark)');
+    r.setProperty('--light', 'var(--c-light)');
+    r.setProperty('--mbord', 'var(--c-border)');
   }
-  // Swap body + main bg
-  document.body.style.background = `var(--mode-bg)`;
-  document.getElementById('main').style.background = `var(--mode-grad)`;
   // panel label
   document.getElementById('ap-mode-label').textContent = m === 'study' ? '🌿 Study Node' : '🎨 Content Node';
-
-  // Restore UI for the new mode's map state
-  closePanel();
-  document.getElementById('sugg-panel').classList.remove('vis');
-
-  if (getTree()) {
-    ['add-sec','ai-sec','nodes-sec'].forEach(id => document.getElementById(id).style.display = 'block');
-    document.getElementById('empty').classList.add('gone');
-    renderMap();
-    resetView();
-  } else {
-    ['add-sec','ai-sec','nodes-sec'].forEach(id => document.getElementById(id).style.display = 'none');
-    document.getElementById('empty').classList.remove('gone');
-    document.getElementById('edges-g').innerHTML = '';
-    document.getElementById('nodes-g').innerHTML = '';
-    document.getElementById('root-input').value = '';
-  }
+  // rebuild action grid if panel open
+  if (panelOpen) buildActionGrid(panelNodeId);
+  if (tree) renderMap();
 }
+
 
 /* ──────────────────────────────────────
    LAYOUT
@@ -697,8 +835,8 @@ function setMode(m) {
 function layout() {
   const svg = document.getElementById('map-svg');
   const W = svg.clientWidth || 900, H = svg.clientHeight || 600;
-  getTree().x = W / 2; getTree().y = H - 80; getTree().depth = 0;
-  layoutKids(getTree(), Math.PI, 2*Math.PI, 148, 1);
+  tree.x = W / 2; tree.y = H - 80; tree.depth = 0;
+  layoutKids(tree, 0, Math.PI, 148, 1);
 }
 function layoutKids(node, minA, maxA, len, depth) {
   const n = node.children.length; if (!n) return;
@@ -714,38 +852,39 @@ function layoutKids(node, minA, maxA, len, depth) {
   });
 }
 
+
 /* ──────────────────────────────────────
    RENDER
 ─────────────────────────────────────── */
 function colorSet(depth) {
   if (mode === 'study') {
-    // Matcha & Milk — sage greens + oat
     const s = [
-      { fill:'#7ab890', stroke:'#3d6b50', text:'#fff'    },   // 0 deep matcha
-      { fill:'#9fcfb0', stroke:'#7ab890', text:'#1e3d2a' },   // 1
-      { fill:'#c2e0ce', stroke:'#9fcfb0', text:'#1e3d2a' },   // 2
-      { fill:'#e0f0e6', stroke:'#c2e0ce', text:'#2d5040' },   // 3
-      { fill:'#f0ebe0', stroke:'#c8a96e', text:'#5a4020' },   // 4 oat/honey tip
+      { fill:'#6dc49a', stroke:'#3a7a5c', text:'#fff'     },
+      { fill:'#96d9b8', stroke:'#6dc49a', text:'#1e4a35'  },
+      { fill:'#bce9d3', stroke:'#96d9b8', text:'#1e4a35'  },
+      { fill:'#ddf4eb', stroke:'#bce9d3', text:'#2d5e45'  },
+      { fill:'#ede0f8', stroke:'#c9a8e8', text:'#3d2a5a'  },
     ];
     return s[Math.min(depth, 4)];
   } else {
-    // Sakura Pop — cherry blossom pinks + gold tips
     const c = [
-      { fill:'#e8729a', stroke:'#a83060', text:'#fff'    },   // 0 deep sakura
-      { fill:'#f09ab8', stroke:'#e8729a', text:'#6e1040' },   // 1
-      { fill:'#f5bdd0', stroke:'#f09ab8', text:'#6e1040' },   // 2
-      { fill:'#fadeea', stroke:'#f5bdd0', text:'#6e1040' },   // 3
-      { fill:'#fef8ec', stroke:'#c9972a', text:'#7a5010' },   // 4 gold tip
+      { fill:'#f4a4b8', stroke:'#be4e6a', text:'#fff'     },
+      { fill:'#f8c2d0', stroke:'#f4a4b8', text:'#6e2036'  },
+      { fill:'#fbd9e4', stroke:'#f8c2d0', text:'#6e2036'  },
+      { fill:'#fdeef4', stroke:'#fbd9e4', text:'#6e2036'  },
+      { fill:'#ede0f8', stroke:'#c9a8e8', text:'#3d2a5a'  },
     ];
     return c[Math.min(depth, 4)];
   }
 }
+
 
 function svgEl(tag, attrs = {}) {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
   Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, v));
   return el;
 }
+
 
 function renderMap() {
   if (!tree) return;
@@ -762,18 +901,18 @@ function renderMap() {
   setTimeout(() => hp.classList.add('gone'), 3000);
 }
 
+
 function renderNode(node, parent) {
   if (parent) drawBranch(parent, node);
   drawNode(node);
   node.children.forEach(c => renderNode(c, node));
 }
 
+
 function drawBranch(p, c) {
   const eg = document.getElementById('edges-g');
   const w = Math.max(10 - c.depth * 2.2, 1.8);
-  const col = mode === 'study'
-    ? (c.depth <= 1 ? '#5a8a68' : c.depth <= 2 ? '#7aaa88' : '#a8c8a8')
-    : (c.depth <= 1 ? '#b85080' : c.depth <= 2 ? '#d87aa0' : '#e8a0b8');
+  const col = c.depth <= 1 ? '#9e6641' : c.depth <= 2 ? '#be8b61' : '#d4a87a';
   const dx = c.x-p.x, dy = c.y-p.y;
   const path = svgEl('path', {
     d: `M${p.x} ${p.y} C${p.x+dx*.15} ${p.y+dy*.45},${c.x-dx*.15} ${c.y-dy*.45},${c.x} ${c.y}`,
@@ -784,11 +923,10 @@ function drawBranch(p, c) {
   if (!c.children.length && c.depth >= 2) drawLeaves(c);
 }
 
+
 function drawLeaves(node) {
   const eg = document.getElementById('edges-g');
-  const cols = mode === 'study'
-    ? ['#c2e0ce','#e0f0e6','#f0ebe0','#9fcfb0','#f4f0e8']
-    : ['#f5bdd0','#fadeea','#fef8ec','#f09ab8','#fef0d0'];
+  const cols = ['#bce9d3','#f8c2d0','#ede0f8','#ddf4eb','#fdeef4'];
   [-0.6,0,0.6,-1.1,1.1].forEach((a,i) => {
     const lx = node.x + Math.cos(a)*(8+Math.random()*4);
     const ly = node.y + Math.sin(a)*(8+Math.random()*4) - 6;
@@ -796,12 +934,14 @@ function drawLeaves(node) {
   });
 }
 
+
 function wrapText(t, max=11) {
   const words = t.split(' ');
   if (words.length<=1 || t.length<=max) return [t];
   const m = Math.ceil(words.length/2);
   return [words.slice(0,m).join(' '), words.slice(m).join(' ')];
 }
+
 
 function drawNode(node) {
   const ng = document.getElementById('nodes-g');
@@ -811,12 +951,15 @@ function drawNode(node) {
   const isSel = node.id===selId;
   const isPanelNode = node.id===panelNodeId && panelOpen;
 
+
   const g = svgEl('g',{'data-id':node.id, style:'cursor:pointer'});
+
 
   // trunk for root
   if (isRoot) {
     g.appendChild(svgEl('rect',{x:node.x-12,y:node.y+18,width:24,height:34,rx:7,fill:'#9e6641',opacity:.65}));
   }
+
 
   // selection halo
   if (isSel || isPanelNode) {
@@ -824,33 +967,52 @@ function drawNode(node) {
     g.appendChild(svgEl('circle',{cx:node.x,cy:node.y,r:r+9,fill:'none',stroke:priColor,'stroke-width':'2.5',opacity:'.7','stroke-dasharray':'5 3'}));
   }
 
+
   // shadow + circle
   g.appendChild(svgEl('circle',{cx:node.x+2,cy:node.y+4,r,fill:'rgba(100,60,80,.1)'}));
   g.appendChild(svgEl('circle',{cx:node.x,cy:node.y,r,fill:col.fill,stroke:col.stroke,'stroke-width':isSel?'3':'2',filter:isRoot?'url(#glow-f)':'url(#soft-sh)'}));
   g.appendChild(svgEl('ellipse',{cx:node.x-r*.3,cy:node.y-r*.3,rx:r*.3,ry:r*.2,fill:'rgba(255,255,255,.38)'}));
 
-  // text
-  const lines = wrapText(node.text, isRoot?14:10);
-  const fs = isRoot ? 13 : Math.max(12-node.depth, 10);
-  const lh = fs+2;
-  const ty = node.y - (lines.length-1)*lh/2;
-  lines.forEach((ln,i) => {
-    const t = svgEl('text',{x:node.x,y:ty+i*lh,'text-anchor':'middle','dominant-baseline':'middle','font-family':'Nunito, sans-serif','font-weight':'800','font-size':fs,fill:col.text});
-    t.textContent = ln;
-    g.appendChild(t);
-  });
+
+  // content
+  if (node.type === 'text') {
+    const lines = wrapText(node.content, isRoot?14:10);
+    const fs = isRoot ? 13 : Math.max(12-node.depth, 10);
+    const lh = fs+2;
+    const ty = node.y - (lines.length-1)*lh/2;
+    lines.forEach((ln,i) => {
+      const t = svgEl('text',{x:node.x,y:ty+i*lh,'text-anchor':'middle','dominant-baseline':'middle','font-family':'Nunito, sans-serif','font-weight':'800','font-size':fs,fill:col.text});
+      t.textContent = ln;
+      g.appendChild(t);
+    });
+  } else if (node.type === 'image') {
+    const img = svgEl('image', {
+      x: node.x - r/2, y: node.y - r/2, width: r, height: r,
+      href: `data:image/png;base64,${node.content}`
+    });
+    g.appendChild(img);
+  } else if (node.type === 'audio') {
+    const playIcon = svgEl('text', {
+      x: node.x, y: node.y + 5, 'text-anchor': 'middle', 'font-size': '16', fill: '#fff'
+    });
+    playIcon.textContent = '▶️';
+    g.appendChild(playIcon);
+  }
+
 
   // flower on root
   if (isRoot) {
     const fl = svgEl('text',{x:node.x,y:node.y-r-10,'text-anchor':'middle','font-size':'15'});
-    fl.textContent = mode==='study'?'🍵':'🌸';
+    fl.textContent = mode==='study'?'🌿':'🎀';
     g.appendChild(fl);
   }
 
-  g.addEventListener('click', e=>{ e.stopPropagation(); selectNode(node.id); });
+
+  g.addEventListener('click', e=>{ e.stopPropagation(); if (node.type === 'audio') { const audio = new Audio(`data:audio/wav;base64,${node.content}`); audio.play(); } else { selectNode(node.id); } });
   g.addEventListener('contextmenu', e=>{ e.preventDefault(); openCtx(e,node.id); });
   ng.appendChild(g);
 }
+
 
 /* ──────────────────────────────────────
    UI ACTIONS
@@ -858,28 +1020,54 @@ function drawNode(node) {
 function plantTree() {
   const val = document.getElementById('root-input').value.trim();
   if (!val) { toast('Type a topic first! 🌸'); return; }
-  maps[mode].nodeId = 0;
-  setTree(mkNode(val)); setSelId(getTree().id);
+  nodeId = 0; tree = mkNode(val, 'text'); selId = tree.id;
   ['add-sec','ai-sec','nodes-sec'].forEach(id=>document.getElementById(id).style.display='block');
   renderMap(); resetView();
   toast('🌱 Your map is sprouting!');
 }
 
+
 function addIdea() {
-  if (!getTree()) return;
-  const val = document.getElementById('idea-input').value.trim();
-  if (!val) { toast('Type an idea first 💭'); return; }
-  const pid = parseInt(document.getElementById('parent-sel').value);
-  const parent = find(getTree(), pid); if (!parent) return;
-  const node = mkNode(val, pid);
-  parent.children.push(node);
-  document.getElementById('idea-input').value = '';
-  setSelId(node.id); renderMap();
-  toast(`✿ "${val}" added!`);
+  if (!tree) return;
+  const type = document.getElementById('add-type').value;
+  let content;
+  if (type === 'text') {
+    content = document.getElementById('idea-input').value.trim();
+    if (!content) { toast('Type an idea first 💭'); return; }
+  } else if (type === 'image') {
+    const file = document.getElementById('image-file').files[0];
+    if (!file) { toast('Select an image first 📷'); return; }
+    fileToBase64(file).then(base64 => {
+      content = base64;
+      addNode(content, type);
+    });
+    return;
+  } else if (type === 'audio') {
+    if (!currentAudio) { toast('Record audio first 🎤'); return; }
+    content = currentAudio;
+  }
+  addNode(content, type);
 }
 
+
+function addNode(content, type) {
+  const pid = parseInt(document.getElementById('parent-sel').value);
+  const parent = find(tree, pid); if (!parent) return;
+  const node = mkNode(content, type, pid);
+  parent.children.push(node);
+  if (type === 'text') document.getElementById('idea-input').value = '';
+  if (type === 'image') document.getElementById('image-file').value = '';
+  if (type === 'audio') {
+    currentAudio = null;
+    document.getElementById('audio-preview').style.display = 'none';
+  }
+  selId = node.id; renderMap();
+  toast(`✿ "${type}" added!`);
+}
+
+
 function selectNode(id) {
-  setSelId(id);
+  selId = id;
   const sel = document.getElementById('parent-sel');
   if (sel) sel.value = id;
   renderMap();
@@ -887,49 +1075,57 @@ function selectNode(id) {
   openPanel(id);
 }
 
+
 function refreshParentSel() {
   const sel = document.getElementById('parent-sel');
-  sel.innerHTML = all(getTree()).map(n=>`<option value="${n.id}" ${n.id===getSelId()?'selected':''}>${'·'.repeat(n.depth*2)} ${n.text.length>26?n.text.slice(0,25)+'…':n.text}</option>`).join('');
+  sel.innerHTML = all(tree).map(n=>`<option value="${n.id}" ${n.id===selId?'selected':''}>${'·'.repeat(n.depth*2)} ${n.type==='text'?(n.content.length>26?n.content.slice(0,25)+'…':n.content):'['+n.type+']'}</option>`).join('');
 }
 
+
 function refreshList() {
-  document.getElementById('node-list').innerHTML = all(getTree()).map(n=>`
-    <div class="node-item ${n.id===getSelId()?'sel':''}" onclick="selectNode(${n.id})">
+  document.getElementById('node-list').innerHTML = all(tree).map(n=>`
+    <div class="node-item ${n.id===selId?'sel':''}" onclick="selectNode(${n.id})">
       <div class="node-dot ${n.depth===0?'root':''}"></div>
-      <span class="node-text">${n.text}</span>
+      <span class="node-text">${n.type==='text'?n.content:'['+n.type+']'}</span>
       ${n.depth>0?`<button class="node-del" onclick="event.stopPropagation();delById(${n.id})">✕</button>`:''}
     </div>`).join('');
 }
 
+
 function delById(id) {
-  if (!getTree()||id===getTree().id) return;
-  del(getTree(),id);
-  if (getSelId()===id) setSelId(getTree().id);
+  if (!tree||id===tree.id) return;
+  del(tree,id);
+  if (selId===id) selId=tree.id;
   if (panelNodeId===id) closePanel();
   renderMap(); toast('Node removed 🍃');
 }
+
 
 /* ──────────────────────────────────────
    ACTION PANEL
 ─────────────────────────────────────── */
 function openPanel(nodeId) {
-  const node = find(getTree(), nodeId); if (!node) return;
+  const node = find(tree, nodeId); if (!node) return;
   panelNodeId = nodeId; panelOpen = true;
 
-  document.getElementById('ap-node-name').textContent  = node.text;
-  document.getElementById('ap-node-emoji').textContent = node.depth===0?'🌳':mode==='study'?'📚':'🎬';
+
+  document.getElementById('ap-node-name').textContent  = node.type==='text'?node.content:'[Media Node]';
+  document.getElementById('ap-node-emoji').textContent = node.depth===0?'🌳':node.type==='image'?'📷':node.type==='audio'?'🎤':mode==='study'?'📚':'🎬';
   document.getElementById('ap-mode-label').textContent = mode==='study'?'🌿 Study Node':'🎨 Content Node';
+
 
   buildActionGrid(nodeId);
   setOutputEmpty();
   document.getElementById('action-panel').classList.add('open');
 }
 
+
 function closePanel() {
   panelOpen = false; panelNodeId = null;
   document.getElementById('action-panel').classList.remove('open');
   if (tree) renderMap();
 }
+
 
 function buildActionGrid(nid) {
   const acts = mode==='study'?STUDY_ACTIONS:CONTENT_ACTIONS;
@@ -939,60 +1135,65 @@ function buildActionGrid(nid) {
     </button>`).join('');
 }
 
+
 async function runAction(actionId, nid) {
-  const node = find(getTree(), parseInt(nid)); if (!node) return;
-  const topic = getTree()?.text || '';
+  const node = find(tree, parseInt(nid)); if (!node) return;
+  const topic = tree?.content || '';
+
 
   // highlight button
   document.querySelectorAll('.act-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('act-'+actionId)?.classList.add('active');
 
+
   setOutputLoading();
+
 
   const endpointMap = {
     explain:'study/explain', quiz:'study/quiz', flashcard:'study/flashcards', connect:'study/connect',
     script:'content/script', moodboard:'content/moodboard', hooks:'content/hooks', shotlist:'content/shotlist',
   };
 
+
   try {
-    const res  = await fetch(`/api/${endpointMap[actionId]}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:node.text,topic})});
+    const res  = await fetch(`/api/${endpointMap[actionId]}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:node.content,topic})});
     const data = await res.json();
-    if (!data.success) { setOutputText('😔 Lumi tripped! Try again.'); return; }
-    setOutputText(data.text);
+    setOutputText(data.success ? data.text : '😔 Lumi tripped! Try again.');
   } catch {
     setOutputText('⚠️ Could not reach the server. Is app.py running?');
   }
 }
+
 
 function setOutputEmpty()   { const o=document.getElementById('ap-output'); o.className='ap-output'; o.innerHTML='<div class="ap-empty">Pick an action to sprout this node! 🌱</div>'; }
 function setOutputLoading() { const o=document.getElementById('ap-output'); o.className='ap-output loading'; o.innerHTML=`<div class="bloom-spin" style="font-size:28px">✿</div><div class="load-txt" style="font-size:13px">Lumi is sprouting…</div>`; }
 function setOutputText(txt) { const o=document.getElementById('ap-output'); o.className='ap-output'; o.innerHTML=`<div style="white-space:pre-wrap">${txt}</div>`; }
 
 
-
 /* ──────────────────────────────────────
    AI sidebar features
 ─────────────────────────────────────── */
 async function aiGenerate() {
-  if (!getTree()) return;
-  const target = find(getTree(), getSelId()??getTree().id); if (!target) return;
+  if (!tree) return;
+  const target = find(tree, selId??tree.id); if (!target) return;
   showAiLoad(true);
   try {
-    const res  = await fetch('/api/generate-ideas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:target.text,existing:target.children.map(c=>c.text),mode})});
+    const res  = await fetch('/api/generate-ideas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:target.text,existing:target.children.map(c=>c.content),mode})});
     const data = await res.json();
     if (data.success) showChips(data.ideas, target.id);
     else toast('AI hiccup — try again 🌸');
   } catch { toast('Server not reachable 🌐'); }
   showAiLoad(false);
 }
+
 
 async function aiExpand() {
-  if (!getTree()) return;
-  const target = find(getTree(), getSelId()??getTree().id); if (!target) return;
-  const parent = target.parentId!=null?find(getTree(),target.parentId):null;
+  if (!tree) return;
+  const target = find(tree, selId??tree.id); if (!target) return;
+  const parent = target.parentId!=null?find(tree,target.parentId):null;
   showAiLoad(true);
   try {
-    const res  = await fetch('/api/expand-node',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:target.text,parent:parent?parent.text:'',depth:target.depth,mode})});
+    const res  = await fetch('/api/expand-node',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:target.content,parent:parent?parent.content:'',depth:target.depth,mode})});
     const data = await res.json();
     if (data.success) showChips(data.ideas, target.id);
     else toast('AI hiccup — try again 🌸');
@@ -1000,19 +1201,21 @@ async function aiExpand() {
   showAiLoad(false);
 }
 
+
 async function aiRefine() {
-  if (!getTree()||getSelId()==null) { toast('Select a node first! 🌸'); return; }
-  const target = find(getTree(),getSelId()); if (!target||target.depth===0) { toast('Select a branch node ✿'); return; }
-  const parent = target.parentId!=null?find(getTree(),target.parentId):null;
+  if (!tree||selId==null) { toast('Select a node first! 🌸'); return; }
+  const target = find(tree,selId); if (!target||target.depth===0) { toast('Select a branch node ✿'); return; }
+  const parent = target.parentId!=null?find(tree,target.parentId):null;
   showAiLoad(true);
   try {
-    const res  = await fetch('/api/refine-idea',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea:target.text,parent:parent?parent.text:''})});
+    const res  = await fetch('/api/refine-idea',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea:target.content,parent:parent?parent.content:''})});
     const data = await res.json();
-    if (data.success) { target.text=data.refined; renderMap(); toast(`✨ Refined: "${data.refined}"`); }
+    if (data.success) { target.content=data.refined; renderMap(); toast(`✨ Refined: "${data.refined}"`); }
     else toast('AI hiccup 🌸');
   } catch { toast('Server not reachable 🌐'); }
   showAiLoad(false);
 }
+
 
 function showChips(ideas, pid) {
   const panel = document.getElementById('sugg-panel');
@@ -1021,14 +1224,18 @@ function showChips(ideas, pid) {
   panel.classList.add('vis');
 }
 
+
 function addChip(pid, text, el) {
-  const parent = find(getTree(), pid); if (!parent) return;
-  const node = mkNode(text, pid);
+  const parent = find(tree, pid); if (!parent) return;
+  const node = mkNode(text, 'text', pid);
   parent.children.push(node);
-  setSelId(node.id); renderMap();
+  selId = node.id; renderMap();
   el.classList.add('used'); el.textContent = '✓ '+text;
   toast(`✿ "${text}" added!`);
 }
+
+
+
 
 
 
@@ -1043,11 +1250,13 @@ function ctxRefine() { if(ctxId!=null){selectNode(ctxId);aiRefine();} }
 function ctxSprout() { if(ctxId!=null){openPanel(ctxId);} }
 function ctxDel()    { if(ctxId!=null) delById(ctxId); }
 
+
 /* ──────────────────────────────────────
    PAN & ZOOM
 ─────────────────────────────────────── */
 const mapSvg = document.getElementById('map-svg');
 const panG   = document.getElementById('pan-g');
+
 
 mapSvg.addEventListener('mousedown',e=>{
   if(e.target===mapSvg||e.target===panG||e.target.id==='edges-g'||e.target.id==='nodes-g'){
@@ -1058,6 +1267,7 @@ document.addEventListener('mousemove',e=>{ if(!panning)return; panX=e.clientX-px
 document.addEventListener('mouseup',()=>{ panning=false; mapSvg.style.cursor='grab'; });
 mapSvg.addEventListener('wheel',e=>{ e.preventDefault(); doZoom(-e.deltaY*.001,e.clientX,e.clientY); },{passive:false});
 
+
 function doZoom(d,cx,cy) {
   const old=scale; scale=Math.max(.3,Math.min(3,scale+d));
   if(cx!=null){ const r=mapSvg.getBoundingClientRect(); const mx=cx-r.left,my=cy-r.top; panX=mx-(mx-panX)*(scale/old); panY=my-(my-panY)*(scale/old); }
@@ -1066,10 +1276,12 @@ function doZoom(d,cx,cy) {
 function applyXform() { panG.setAttribute('transform',`translate(${panX},${panY}) scale(${scale})`); }
 function resetView()  { panX=0;panY=0;scale=1;applyXform(); }
 
+
 /* ──────────────────────────────────────
    MISC
 ─────────────────────────────────────── */
 function showAiLoad(v) { document.getElementById('ai-load').classList.toggle('gone',!v); }
+
 
 let toastTid;
 function toast(msg) {
@@ -1077,10 +1289,11 @@ function toast(msg) {
   clearTimeout(toastTid); toastTid=setTimeout(()=>t.classList.remove('show'),2800);
 }
 
+
 function clearMap() {
-  if(!getTree())return;
+  if(!tree)return;
   if(!confirm('Clear the entire map? This can\'t be undone.'))return;
-  maps[mode].tree=null; maps[mode].selId=null; maps[mode].nodeId=0;
+  tree=null; selId=null; nodeId=0;
   document.getElementById('edges-g').innerHTML='';
   document.getElementById('nodes-g').innerHTML='';
   document.getElementById('empty').classList.remove('gone');
@@ -1090,14 +1303,18 @@ function clearMap() {
   toast('Canvas cleared 🌿');
 }
 
+
 window.addEventListener('resize',()=>{ if(tree)renderMap(); });
+
 
 // click canvas to deselect
 mapSvg.addEventListener('click',e=>{
   if(['map-svg','pan-g','edges-g','nodes-g'].includes(e.target.id)||e.target===mapSvg){
-    setSelId(null); if(getTree())renderMap();
+    selId=null; if(tree)renderMap();
   }
 });
 </script>
 </body>
 </html>
+
+

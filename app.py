@@ -14,8 +14,8 @@ from groq import Groq
 load_dotenv()
 
 app = Flask(__name__)
-import secrets
-app.secret_key = secrets.token_hex(16)  # random every restart = sessions always clear
+# ✅ Fixed: use a stable secret key so sessions survive Flask restarts
+app.secret_key = os.environ.get("SECRET_KEY", "sprout-dev-secret-key")
 
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
@@ -40,7 +40,8 @@ def hash_pw(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 init_db()
-MODEL  = "llama-3.3-70b-versatile"
+
+MODEL = "llama-3.3-70b-versatile"
 
 SYSTEM = (
     "You are Lumi, a warm and creative AI companion inside Sprout, "
@@ -74,6 +75,7 @@ def parse_json(text):
 
 @app.route("/")
 def index():
+    # ✅ Always redirect to login first if not logged in
     if not session.get("user"):
         return redirect(url_for("login"))
     if not session.get("mode"):
@@ -96,6 +98,7 @@ def mode_select():
 
 @app.route("/logout")
 def logout():
+    # ✅ Clears session and sends user back to login
     session.clear()
     return redirect(url_for("login"))
 
