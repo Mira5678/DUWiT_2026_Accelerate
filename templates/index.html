@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -373,9 +373,27 @@
   }
   .ap-empty { color: var(--muted); text-align: center; padding-top: 32px; font-weight: 700; }
 
+  /* Logout Button Styling */
+  .sb-footer {
+    padding: 14px 16px;
+    margin-top: auto; /* This pushes the logout to the very bottom */
+    border-top: 1.5px solid var(--border);
+    background: var(--white);
+  }
 
+  .btn-logout {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    text-decoration: none; /* Remove underline from link */
+    width: 100%;
+  }
 
-
+  .btn-logout:hover {
+    background: #ffe8ec; /* Light petal red */
+    color: #e11d48;      /* Deep berry red */
+    border-color: #f0b8ce;
+  }
 
   /* ══════════════════════════════════════
      CONTEXT MENU
@@ -495,6 +513,12 @@
   <div class="sb-section" id="nodes-sec" style="display:none; flex:1">
     <div class="sec-label">✦ Your Ideas</div>
     <div class="node-list" id="node-list"></div>
+  </div>
+
+  <div class="sb-footer">
+    <a href="{{ url_for('logout') }}" class="btn btn-logout btn-full">
+      <span>Log Out</span>
+    </a>
   </div>
 </aside>
 
@@ -1115,23 +1139,46 @@ mapSvg.addEventListener('click',e=>{
 async function saveBoard() {
   const t = getTree();
   if (!t) { toast('Nothing to save yet! 🌱'); return; }
+
   try {
+
+    //debugging
+    console.log("Attempting to save board:", t.text);
+
     const res = await fetch('/api/boards/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic: t.content, mode, nodes: t })
+      body: JSON.stringify({ 
+        topic: t.text, 
+        mode: mode, 
+        nodes: t 
+      })
     });
     const data = await res.json();
-    if (data.success) toast('💾 Board saved!');
-    else toast('Save failed 🌧 Try again');
-  } catch { toast('Could not reach server 🌐'); }
+
+    if (data.success) {
+      toast(`💾 Saved: ${t.text}`);
+      // Refresh the list if the panel is already open
+      if (document.getElementById('boards-panel').style.display !== 'none') {
+        loadBoards();
+      }
+    } else {
+      toast('Save failed 🌧 ' + (data.error || ''));
+    }
+  } catch (err) {
+    console.error("Save Error:", err);
+    toast('Could not reach server 🌐');
+  }
 }
 
 function toggleBoards() {
   const panel = document.getElementById('boards-panel');
-  const isOpen = panel.style.display !== 'none';
-  panel.style.display = isOpen ? 'none' : 'block';
-  if (!isOpen) loadBoards();
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    loadBoards();
+  } else {
+    panel.style.display = 'none';
+  }
 }
 
 async function loadBoards() {
