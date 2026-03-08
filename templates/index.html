@@ -141,13 +141,14 @@
   }
 
   /* Inputs */
-  input[type="text"], textarea, select {
+  input[type="text"], input[type="file"], textarea, select {
     width: 100%; padding: 9px 12px;
     border: 1.5px solid var(--border); border-radius: 11px;
     background: var(--white); font-family: 'Nunito', sans-serif;
     font-size: 12.5px; color: var(--ink); outline: none;
     transition: border-color .2s, box-shadow .2s;
   }
+
   input:focus, textarea:focus, select:focus {
     border-color: var(--pri);
     box-shadow: 0 0 0 3px var(--light);
@@ -158,8 +159,9 @@
     background-repeat: no-repeat; background-position: right 10px center;
     padding-right: 28px;
   }
-  .input-row { display: flex; gap: 7px; margin-top: 8px; }
-  .input-row input { flex: 1; }
+  .input-row { display: flex; gap: 7px; margin-top: 8px; margin-bottom: 8px; align-items: center; }
+  .input-row input[type="text"], .input-row input[type="file"] { flex: 1; }
+  .input-row button:not([style*="flex: 1"]) { flex-shrink: 0; }
 
   /* Buttons */
   .btn {
@@ -462,7 +464,7 @@
 <aside id="sidebar">
   <div class="sb-header">
     <div class="logo">🌱 <em>Sprout</em></div>
-    <div class="tagline">organise your thoughts visually ✦ </div>
+    <div class="tagline"> organise your thoughts visually ✦ </div>
 
     <div class="mode-toggle">
       <button class="mode-btn active-study" id="btn-study"  onclick="setMode('study')">📚 Study Hub</button>
@@ -488,16 +490,32 @@
   <!-- Add idea -->
   <div class="sb-section" id="add-sec" style="display:none">
     <div class="sec-label">✦ Add an Idea</div>
-    <select id="parent-sel"></select>
-    <div class="input-row">
+    <select id="add-type">
+      <option value="text">Text</option>
+      <option value="image">Image</option>
+      <option value="audio">Voice</option>
+    </select>
+    <div id="text-input" class="input-row">
       <input type="text" id="idea-input" placeholder="Type an idea…" onkeydown="if(event.key==='Enter')addIdea()"/>
       <button class="btn btn-primary" onclick="addIdea()">＋</button>
     </div>
+    <div id="image-input" class="input-row" style="display:none">
+      <input type="file" id="image-file" accept="image/*">
+      <button class="btn btn-primary" onclick="addIdea()">＋</button>
+    </div>
+    <div id="audio-input" style="display:none">
+      <div class="input-row">
+        <button id="record-btn" class="btn btn-soft" style="flex: 1;">🎤 Record Voice</button>
+        <button class="btn btn-primary" onclick="addIdea()">＋</button>
+      </div>
+      <audio id="audio-preview" controls style="display:none; width:100%; margin-top:8px;"></audio>
+    </div>
+    <select id="parent-sel"></select>
   </div>
 
   <!-- AI tools -->
   <div class="sb-section" id="ai-sec" style="display:none">
-    <div class="sec-label">✦ AI Magic ✨</div>
+    <div class="sec-label">✦ AI Features ✨</div>
     <button class="btn btn-soft btn-full" onclick="aiGenerate()">✨ Generate Ideas for Node</button>
     <button class="btn btn-soft btn-full" onclick="aiExpand()">🌿 Expand Selected Branch</button>
     <button class="btn btn-soft btn-full" onclick="aiRefine()">✏️ Refine Selected Node</button>
@@ -636,8 +654,8 @@ function nextId()    { return maps[mode].nodeId++; }
 /* ──────────────────────────────────────
    DATA
 ─────────────────────────────────────── */
-function mkNode(text, parentId = null) {
-  return { id: nextId(), text, parentId, children: [], x: 0, y: 0, depth: 0 };
+function mkNode(content, type = 'text', parentId = null) {
+  return { id: nextId(), content, type, parentId, children: [], x: 0, y: 0, depth: 0 };
 }
 function find(node, id) {
   if (!node) return null;
@@ -658,6 +676,65 @@ function del(node, id) {
   for (const c of node.children) if (del(c, id)) return true;
   return false;
 }
+
+/* ──────────────────────────────────────
+   MEDIA & FILE HANDLING
+─────────────────────────────────────── */
+document.getElementById('add-type').addEventListener('change', function() {
+  const type = this.value;
+  document.getElementById('text-input').style.display = type === 'text' ? 'flex' : 'none';
+  document.getElementById('image-input').style.display = type === 'image' ? 'flex' : 'none';
+  document.getElementById('audio-input').style.display = type === 'audio' ? 'block' : 'none';
+});
+
+let mediaRecorder;
+let audioChunks = [];
+let currentAudio = null;
+
+function startRecording() {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.start();
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/wav' });
+        const audioUrl = URL.createObjectURL(blob);
+        document.getElementById('audio-preview').src = audioUrl;
+        document.getElementById('audio-preview').style.display = 'block';
+        blobToBase64(blob).then(base64 => {
+          currentAudio = base64;
+        });
+      };
+      document.getElementById('record-btn').textContent = '⏹️ Stop Recording';
+      document.getElementById('record-btn').onclick = stopRecording;
+    });
+}
+
+function stopRecording() {
+  mediaRecorder.stop();
+  document.getElementById('record-btn').textContent = '🎤 Record Voice';
+  document.getElementById('record-btn').onclick = startRecording;
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.readAsDataURL(blob);
+  });
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('record-btn').onclick = startRecording;
 
 /* ──────────────────────────────────────
    MODE
@@ -862,15 +939,29 @@ function drawNode(node) {
   g.appendChild(svgEl('ellipse',{cx:node.x-r*.3,cy:node.y-r*.3,rx:r*.3,ry:r*.2,fill:'rgba(255,255,255,.38)'}));
 
   // text
-  const lines = wrapText(node.text, isRoot?14:10);
-  const fs = isRoot ? 13 : Math.max(12-node.depth, 10);
-  const lh = fs+2;
-  const ty = node.y - (lines.length-1)*lh/2;
-  lines.forEach((ln,i) => {
-    const t = svgEl('text',{x:node.x,y:ty+i*lh,'text-anchor':'middle','dominant-baseline':'middle','font-family':'Nunito, sans-serif','font-weight':'800','font-size':fs,fill:col.text});
-    t.textContent = ln;
-    g.appendChild(t);
-  });
+  if (node.type === 'text') {
+    const lines = wrapText(node.content, isRoot?14:10);
+    const fs = isRoot ? 13 : Math.max(12-node.depth, 10);
+    const lh = fs+2;
+    const ty = node.y - (lines.length-1)*lh/2;
+    lines.forEach((ln,i) => {
+      const t = svgEl('text',{x:node.x,y:ty+i*lh,'text-anchor':'middle','dominant-baseline':'middle','font-family':'Nunito, sans-serif','font-weight':'800','font-size':fs,fill:col.text});
+      t.textContent = ln;
+      g.appendChild(t);
+    });
+  } else if (node.type === 'image') {
+    const img = svgEl('image', {
+      x: node.x - r/2, y: node.y - r/2, width: r, height: r,
+      href: `data:image/jpeg;base64,${node.content}`
+    });
+    g.appendChild(img);
+  } else if (node.type === 'audio') {
+    const playIcon = svgEl('text', {
+      x: node.x, y: node.y + 5, 'text-anchor': 'middle', 'font-size': '16', fill: col.text
+    });
+    playIcon.textContent = '▶️';
+    g.appendChild(playIcon);
+  }
 
   // flower on root
   if (isRoot) {
@@ -879,7 +970,7 @@ function drawNode(node) {
     g.appendChild(fl);
   }
 
-  g.addEventListener('click', e=>{ e.stopPropagation(); selectNode(node.id); });
+  g.addEventListener('click', e=>{ e.stopPropagation(); if (node.type === 'audio') { const audio = new Audio(`data:audio/wav;base64,${node.content}`); audio.play(); } else { selectNode(node.id); } });
   g.addEventListener('contextmenu', e=>{ e.preventDefault(); openCtx(e,node.id); });
   ng.appendChild(g);
 }
@@ -891,7 +982,7 @@ function plantTree() {
   const val = document.getElementById('root-input').value.trim();
   if (!val) { toast('Type a topic first! 🌸'); return; }
   maps[mode].nodeId = 0;
-  setTree(mkNode(val)); setSelId(getTree().id);
+  setTree(mkNode(val, 'text')); setSelId(getTree().id);
   ['add-sec','ai-sec','nodes-sec'].forEach(id=>document.getElementById(id).style.display='block');
   renderMap(); resetView();
   toast('🌱 Your map is sprouting!');
@@ -899,15 +990,38 @@ function plantTree() {
 
 function addIdea() {
   if (!getTree()) return;
-  const val = document.getElementById('idea-input').value.trim();
-  if (!val) { toast('Type an idea first 💭'); return; }
+  const type = document.getElementById('add-type').value;
+  let content;
+  if (type === 'text') {
+    content = document.getElementById('idea-input').value.trim();
+    if (!content) { toast('Type an idea first 💭'); return; }
+  } else if (type === 'image') {
+    const file = document.getElementById('image-file').files[0];
+    if (!file) { toast('Select an image first 📷'); return; }
+    fileToBase64(file).then(base64 => {
+      addNode(base64, type);
+    });
+    return;
+  } else if (type === 'audio') {
+    if (!currentAudio) { toast('Record audio first 🎤'); return; }
+    content = currentAudio;
+  }
+  addNode(content, type);
+}
+
+function addNode(content, type) {
   const pid = parseInt(document.getElementById('parent-sel').value);
   const parent = find(getTree(), pid); if (!parent) return;
-  const node = mkNode(val, pid);
+  const node = mkNode(content, type, pid);
   parent.children.push(node);
-  document.getElementById('idea-input').value = '';
+  if (type === 'text') document.getElementById('idea-input').value = '';
+  if (type === 'image') document.getElementById('image-file').value = '';
+  if (type === 'audio') {
+    currentAudio = null;
+    document.getElementById('audio-preview').style.display = 'none';
+  }
   setSelId(node.id); renderMap();
-  toast(`✿ "${val}" added!`);
+  toast(`✿ "${type}" added!`);
 }
 
 function selectNode(id) {
@@ -921,14 +1035,14 @@ function selectNode(id) {
 
 function refreshParentSel() {
   const sel = document.getElementById('parent-sel');
-  sel.innerHTML = all(getTree()).map(n=>`<option value="${n.id}" ${n.id===getSelId()?'selected':''}>${'·'.repeat(n.depth*2)} ${n.text.length>26?n.text.slice(0,25)+'…':n.text}</option>`).join('');
+  sel.innerHTML = all(getTree()).map(n=>`<option value="${n.id}" ${n.id===getSelId()?'selected':''}>${'·'.repeat(n.depth*2)} ${n.type==='text'?(n.content.length>26?n.content.slice(0,25)+'…':n.content):'['+n.type+']'}</option>`).join('');
 }
 
 function refreshList() {
   document.getElementById('node-list').innerHTML = all(getTree()).map(n=>`
     <div class="node-item ${n.id===getSelId()?'sel':''}" onclick="selectNode(${n.id})">
       <div class="node-dot ${n.depth===0?'root':''}"></div>
-      <span class="node-text">${n.text}</span>
+      <span class="node-text">${n.type==='text'?n.content:'['+n.type+']'}</span>
       ${n.depth>0?`<button class="node-del" onclick="event.stopPropagation();delById(${n.id})">✕</button>`:''}
     </div>`).join('');
 }
@@ -948,8 +1062,8 @@ function openPanel(nodeId) {
   const node = find(getTree(), nodeId); if (!node) return;
   panelNodeId = nodeId; panelOpen = true;
 
-  document.getElementById('ap-node-name').textContent  = node.text;
-  document.getElementById('ap-node-emoji').textContent = node.depth===0?'🌳':mode==='study'?'📚':'🎬';
+  document.getElementById('ap-node-name').textContent  = node.type==='text'?node.content:'[Media Node]';
+  document.getElementById('ap-node-emoji').textContent = node.depth===0?'🌳':node.type==='image'?'📷':node.type==='audio'?'🎤':mode==='study'?'📚':'🎬';
   document.getElementById('ap-mode-label').textContent = mode==='study'?'🌿 Study Node':'🎨 Content Node';
 
   buildActionGrid(nodeId);
@@ -973,7 +1087,7 @@ function buildActionGrid(nid) {
 
 async function runAction(actionId, nid) {
   const node = find(getTree(), parseInt(nid)); if (!node) return;
-  const topic = getTree()?.text || '';
+  const topic = getTree()?.content || '';
 
   // highlight button
   document.querySelectorAll('.act-btn').forEach(b=>b.classList.remove('active'));
@@ -988,8 +1102,8 @@ async function runAction(actionId, nid) {
 
   try {
     const rootNode = getTree();
-    const branches = rootNode ? all(rootNode).slice(1).map(n => n.text) : [];
-    const res  = await fetch(`/api/${endpointMap[actionId]}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:node.text,topic,branches})});
+    const branches = rootNode ? all(rootNode).slice(1).map(n => n.type==='text'?n.content:'['+n.type+']') : [];
+    const res  = await fetch(`/api/${endpointMap[actionId]}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:node.type==='text'?node.content:'['+node.type+']',topic,branches})});
     const data = await res.json();
     if (!data.success) { setOutputText('😔 Lumi tripped! Try again.'); return; }
     setOutputText(data.text);
@@ -1012,7 +1126,7 @@ async function aiGenerate() {
   const target = find(getTree(), getSelId()??getTree().id); if (!target) return;
   showAiLoad(true);
   try {
-    const res  = await fetch('/api/generate-ideas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:target.text,existing:target.children.map(c=>c.text),mode})});
+    const res  = await fetch('/api/generate-ideas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:target.content,existing:target.children.map(c=>c.content),mode})});
     const data = await res.json();
     if (data.success) showChips(data.ideas, target.id);
     else toast('AI hiccup — try again 🌸');
@@ -1026,7 +1140,7 @@ async function aiExpand() {
   const parent = target.parentId!=null?find(getTree(),target.parentId):null;
   showAiLoad(true);
   try {
-    const res  = await fetch('/api/expand-node',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:target.text,parent:parent?parent.text:'',depth:target.depth,mode})});
+    const res  = await fetch('/api/expand-node',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({node:target.content,parent:parent?parent.content:'',depth:target.depth,mode})});
     const data = await res.json();
     if (data.success) showChips(data.ideas, target.id);
     else toast('AI hiccup — try again 🌸');
@@ -1040,9 +1154,9 @@ async function aiRefine() {
   const parent = target.parentId!=null?find(getTree(),target.parentId):null;
   showAiLoad(true);
   try {
-    const res  = await fetch('/api/refine-idea',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea:target.text,parent:parent?parent.text:''})});
+    const res  = await fetch('/api/refine-idea',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea:target.content,parent:parent?parent.content:''})});
     const data = await res.json();
-    if (data.success) { target.text=data.refined; renderMap(); toast(`✨ Refined: "${data.refined}"`); }
+    if (data.success) { target.content=data.refined; renderMap(); toast(`✨ Refined: "${data.refined}"`); }
     else toast('AI hiccup 🌸');
   } catch { toast('Server not reachable 🌐'); }
   showAiLoad(false);
@@ -1057,7 +1171,7 @@ function showChips(ideas, pid) {
 
 function addChip(pid, text, el) {
   const parent = find(getTree(), pid); if (!parent) return;
-  const node = mkNode(text, pid);
+  const node = mkNode(text, 'text', pid);
   parent.children.push(node);
   setSelId(node.id); renderMap();
   el.classList.add('used'); el.textContent = '✓ '+text;
@@ -1143,21 +1257,21 @@ async function saveBoard() {
   try {
 
     //debugging
-    console.log("Attempting to save board:", t.text);
+    console.log("Attempting to save board:", t.content);
 
     const res = await fetch('/api/boards/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        topic: t.text,
-        mode: mode,
-        nodes: t
+      body: JSON.stringify({ 
+        topic: t.content, 
+        mode: mode, 
+        nodes: t 
       })
     });
     const data = await res.json();
 
     if (data.success) {
-      toast(`💾 Saved: ${t.text}`);
+      toast(`💾 Saved: ${t.content}`);
       // Refresh the list if the panel is already open
       if (document.getElementById('boards-panel').style.display !== 'none') {
         loadBoards();
