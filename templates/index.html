@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -462,7 +462,7 @@
 <aside id="sidebar">
   <div class="sb-header">
     <div class="logo">🌱 <em>Sprout</em></div>
-    <div class="tagline">grow your ideas beautifully ✦</div>
+    <div class="tagline">organise your thoughts visually ✦ </div>
 
     <div class="mode-toggle">
       <button class="mode-btn active-study" id="btn-study"  onclick="setMode('study')">📚 Study Hub</button>
@@ -1148,10 +1148,10 @@ async function saveBoard() {
     const res = await fetch('/api/boards/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        topic: t.text, 
-        mode: mode, 
-        nodes: t 
+      body: JSON.stringify({
+        topic: t.text,
+        mode: mode,
+        nodes: t
       })
     });
     const data = await res.json();
