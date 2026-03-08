@@ -1158,8 +1158,25 @@ function openPanel(nodeId) {
   const node = find(tree, nodeId); if (!node) return;
   panelNodeId = nodeId; panelOpen = true;
 
+  const nameEl = document.getElementById('ap-node-name');
+  if (node.type === 'text') {
+    nameEl.textContent = node.content;
+  } else if (node.type === 'image') {
+    nameEl.innerHTML = `
+    <div style="font-size:13px; font-weight:700; margin-bottom:6px;">
+      📷 Image Preview
+    </div>
+    <img 
+      src="data:image/png;base64,${node.content}" 
+      style="max-width:100%; max-height:200px; border-radius:10px; object-fit:cover;"
+    >
+  `;
+  } else if (node.type === 'audio') {
+    nameEl.innerHTML = `<audio controls style="width: 100%; margin-top: 8px;"><source src="${node.content}" type="audio/wav"></audio>`;
+  } else {
+    nameEl.textContent = '[Media Node]';
+  }
 
-  document.getElementById('ap-node-name').textContent  = node.type==='text'?node.content:'[Media Node]';
   document.getElementById('ap-node-emoji').textContent = node.depth===0?'🌳':node.type==='image'?'📷':node.type==='audio'?'🎤':mode==='study'?'📚':'🎬';
   document.getElementById('ap-mode-label').textContent = mode==='study'?'🌿 Study Node':'🎨 Content Node';
 
