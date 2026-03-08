@@ -7,6 +7,8 @@ import os
 import json
 import sqlite3
 import hashlib
+import uuid
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from dotenv import load_dotenv
 from groq import Groq
@@ -14,10 +16,13 @@ from groq import Groq
 load_dotenv()
 
 app = Flask(__name__)
-# ✅ Fixed: use a stable secret key so sessions survive Flask restarts
-app.secret_key = os.environ.get("SECRET_KEY", "sprout-dev-secret-key")
+import secrets
+app.secret_key = secrets.token_hex(16)  # random every restart = sessions always clear
 
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+# In-memory boards store (persists while server is running)
+boards_store = {}
 
 # ════════════════════════════════════════
 #  DATABASE
@@ -40,8 +45,7 @@ def hash_pw(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 init_db()
-
-MODEL = "llama-3.3-70b-versatile"
+MODEL  = "llama-3.3-70b-versatile"
 
 SYSTEM = (
     "You are Lumi, a warm and creative AI companion inside Sprout, "
@@ -75,7 +79,6 @@ def parse_json(text):
 
 @app.route("/")
 def index():
-    # ✅ Always redirect to login first if not logged in
     if not session.get("user"):
         return redirect(url_for("login"))
     if not session.get("mode"):
@@ -98,7 +101,6 @@ def mode_select():
 
 @app.route("/logout")
 def logout():
-    # ✅ Clears session and sends user back to login
     session.clear()
     return redirect(url_for("login"))
 
@@ -288,27 +290,50 @@ def study_connect():
 @app.route("/api/content/script", methods=["POST"])
 def content_script():
     try:
-        data  = request.json or {}
-        node  = data.get("node", "")
-        topic = data.get("topic", "")
-        prompt = (f"Write a 30-second TikTok script for '{node}' angle of a video about '{topic}'. "
-                  "Format:\n🎬 HOOK (0-3s):\n📖 MIDDLE (3-25s):\n✨ CTA (25-30s):\nUnder 200 words.")
-        return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
+        data     = request.json or {}
+        node     = data.get("node", "")
+        topic    = data.get("topic", "")
+        branches = data.get("branches", [])
+        all_scenes = branches if branches else [node]
+        scenes_str = ", ".join(all_scenes)
+        prompt = (
+            f"Write a 30-second TikTok script for a '{topic}' video that covers ALL of these scenes: {scenes_str}.\n"
+            "The script must naturally flow through every single scene listed — not just one.\n"
+            "Format:\n"
+            "🎬 HOOK (0-3s): tease the whole day/journey, mention 1-2 specific scenes\n"
+            f"📖 MIDDLE (3-25s): move through EACH scene ({scenes_str}) with a specific detail per scene\n"
+            "✨ CTA (25-30s): wrap up the full journey, feel personal not promotional\n"
+            "Under 220 words. Every scene must appear in the script."
+        )
+        return jsonify({"success": True, "text": ask(prompt, max_tokens=450)})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-@app.route("/api/content/moodboard", methods=["POST"])
-def content_moodboard():
+@app.route("/api/content/plan", methods=["POST"])
+def content_plan():
     try:
-        data  = request.json or {}
-        node  = data.get("node", "")
-        topic = data.get("topic", "")
-        prompt = (f"Visual moodboard brief for '{node}' in a video about '{topic}':\n"
-                  "🎨 COLOR PALETTE — 5 colorblind-friendly pastel hex codes with names\n"
-                  "📷 VISUAL AESTHETIC — 3 style references\n"
-                  "💡 LIGHTING MOOD\n🎥 CAMERA STYLE\n✨ OVERALL VIBE\nUnder 220 words.")
-        return jsonify({"success": True, "text": ask(prompt, max_tokens=450)})
+        data     = request.json or {}
+        node     = data.get("node", "")
+        topic    = data.get("topic", "")
+        branches = data.get("branches", [])
+        all_scenes = branches if branches else [node]
+        scenes_str = ", ".join(all_scenes)
+        prompt = (
+            f"Create a 7-day content posting plan for a creator making a '{topic}' series.\n"
+            f"They have these specific scenes/moments to film: {scenes_str}.\n\n"
+            "Rules:\n"
+            "- Spread ALL the scenes across the 7 days — every scene must appear at least once\n"
+            "- Some days can combine 2 scenes into one video\n"
+            "- Do NOT invent new topics — only use the scenes listed above\n\n"
+            "For each day:\n"
+            "📅 Day N: Platform\n"
+            "🎬 Video idea (must name the specific scene from the list)\n"
+            "⚡ Hook (first 3s) — reference that exact scene\n"
+            "🏷️ 3 hashtags\n\n"
+            "Under 320 words."
+        )
+        return jsonify({"success": True, "text": ask(prompt, max_tokens=650)})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -316,11 +341,20 @@ def content_moodboard():
 @app.route("/api/content/hooks", methods=["POST"])
 def content_hooks():
     try:
-        data  = request.json or {}
-        node  = data.get("node", "")
-        topic = data.get("topic", "")
-        prompt = (f"5 TikTok hooks (first 3s) for '{node}' from a video about '{topic}'. "
-                  "Label each: Curiosity/Shock/Relatability/FOMO/Humor. Under 200 words.")
+        data     = request.json or {}
+        node     = data.get("node", "")
+        topic    = data.get("topic", "")
+        branches = data.get("branches", [])
+        all_scenes = branches if branches else [node]
+        scenes_str = ", ".join(all_scenes)
+        prompt = (
+            f"Write 5 TikTok hooks (first 3 seconds) for a '{topic}' video.\n"
+            f"The video covers ALL of these moments: {scenes_str}.\n"
+            "Each hook should tease the full video — not just one scene.\n"
+            "Label each: Curiosity / Shock / Relatability / FOMO / Humor\n"
+            f"Mention at least 2 of these specific scenes per hook: {scenes_str}\n"
+            "No generic filler — every hook must feel like it\'s about THIS specific video. Under 180 words."
+        )
         return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -329,14 +363,77 @@ def content_hooks():
 @app.route("/api/content/shotlist", methods=["POST"])
 def content_shotlist():
     try:
-        data  = request.json or {}
-        node  = data.get("node", "")
-        topic = data.get("topic", "")
-        prompt = (f"B-roll shot list for '{node}' in a video about '{topic}'. "
-                  "5 shots: 📽️ Shot type | 🎯 Subject | ⏱️ Duration | 💭 Why it works. Under 200 words.")
-        return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
+        data     = request.json or {}
+        node     = data.get("node", "")
+        topic    = data.get("topic", "")
+        branches = data.get("branches", [])
+        all_scenes = branches if branches else [node]
+        scenes_str = ", ".join(all_scenes)
+        prompt = (
+            f"Create a B-roll shot list for a '{topic}' video.\n"
+            f"The video must cover ALL of these scenes: {scenes_str}.\n"
+            f"Give at least one dedicated shot per scene, plus 1-2 transition shots between scenes.\n"
+            "For each shot:\n"
+            "📽️ Shot type (wide/close-up/POV/cutaway) | 🎯 Exact subject from the scene | ⏱️ Duration | 💭 Why it works\n"
+            "Every scene in the list must have a shot. Under 220 words."
+        )
+        return jsonify({"success": True, "text": ask(prompt, max_tokens=450)})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ════════════════════════════════════════
+#  BOARDS — Save & Load
+# ════════════════════════════════════════
+
+@app.route("/api/boards/save", methods=["POST"])
+def save_board():
+    if not session.get("user"):
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    data  = request.json or {}
+    nodes = data.get("nodes", {})
+    topic = data.get("topic", "Untitled")
+    mode  = data.get("mode", "study")
+    board_id = str(uuid.uuid4())[:8]
+    boards_store[board_id] = {
+        "id":         board_id,
+        "topic":      topic,
+        "mode":       mode,
+        "nodes":      nodes,
+        "created_at": datetime.utcnow().isoformat()
+    }
+    return jsonify({"success": True, "id": board_id})
+
+
+@app.route("/api/boards", methods=["GET"])
+def list_boards():
+    if not session.get("user"):
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    summaries = [
+        {k: v for k, v in b.items() if k != "nodes"}
+        for b in boards_store.values()
+    ]
+    return jsonify({"success": True, "boards": summaries})
+
+
+@app.route("/api/boards/<board_id>", methods=["GET"])
+def get_board(board_id):
+    if not session.get("user"):
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    board = boards_store.get(board_id)
+    if not board:
+        return jsonify({"success": False, "error": "Board not found"}), 404
+    return jsonify({"success": True, "board": board})
+
+
+@app.route("/api/boards/<board_id>", methods=["DELETE"])
+def delete_board(board_id):
+    if not session.get("user"):
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    if board_id not in boards_store:
+        return jsonify({"success": False, "error": "Board not found"}), 404
+    del boards_store[board_id]
+    return jsonify({"success": True})
 
 
 # ════════════════════════════════════════
