@@ -36,10 +36,8 @@ function deleteNode(node, id) {
   return false;
 }
 
-// ══════════════════════════════════════════════
-//  Layout
-// ══════════════════════════════════════════════
 
+//  Layout
 function layoutTree() {
   const svg = document.getElementById('mindmap-svg');
   const W = svg.clientWidth || 900;
@@ -75,10 +73,8 @@ function layoutChildren(node, minA, maxA, branchLen, depth) {
   });
 }
 
-// ══════════════════════════════════════════════
-//  Render
-// ══════════════════════════════════════════════
 
+//  Render
 const NODE_COLORS = {
   node0: { fill: '#FF6B9D', stroke: '#E91E8C', text: '#fff' },
   node1: { fill: '#FF9CC5', stroke: '#FF6B9D', text: '#5D2E4A' },
@@ -295,10 +291,8 @@ function drawNodeEl(node) {
   ng.appendChild(g);
 }
 
-// ══════════════════════════════════════════════
-//  UI Actions
-// ══════════════════════════════════════════════
 
+//  UI Actions
 function setRootTopic() {
   const val = document.getElementById('root-input').value.trim();
   if (!val) { showToast('Please enter a topic first! 🌸'); return; }
@@ -387,10 +381,8 @@ function deleteNodeById(id) {
   }
 }
 
-// ══════════════════════════════════════════════
-//  Context Menu
-// ══════════════════════════════════════════════
 
+//  Context Menu
 function openCtxMenu(e, nodeId) {
   ctxNodeId = nodeId;
   const menu = document.getElementById('ctx-menu');
@@ -425,10 +417,8 @@ function ctxDelete() {
   if (ctxNodeId != null) deleteNodeById(ctxNodeId);
 }
 
-// ══════════════════════════════════════════════
-//  AI Features
-// ══════════════════════════════════════════════
 
+//  AI Features
 async function generateIdeas() {
   if (!tree) return;
   const targetId = selectedNodeId ?? tree.id;
@@ -550,9 +540,8 @@ function addSuggestion(parentId, text, chipEl) {
   showToast(`✿ "${text}" added!`);
 }
 
-// ══════════════════════════════════════════════
 //  Pan & Zoom
-// ══════════════════════════════════════════════
+
 
 const svg      = document.getElementById('mindmap-svg');
 const panGroup = document.getElementById('pan-group');
@@ -624,9 +613,7 @@ function clearMap() {
   showToast('Canvas cleared 🌿');
 }
 
-// ══════════════════════════════════════════════
 //  Helpers
-// ══════════════════════════════════════════════
 
 function showAILoading(show) {
   document.getElementById('ai-loading').classList.toggle('hidden', !show);

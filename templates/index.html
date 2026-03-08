@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -8,9 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Bubblegum+Sans&display=swap" rel="stylesheet"/>
 
   <style>
-  /* ══════════════════════════════════════
-     TOKENS
-  ══════════════════════════════════════ */
+  /*TOKENS*/
   :root {
     /* ── Neutrals (shared) ── */
     --bg:       #faf7f2;
@@ -39,7 +37,7 @@
     --c-bg:     #fff5f8;       /* sakura bg */
     --c-grad:   linear-gradient(135deg, #fde8f0 0%, #fff5f8 50%, #fef8ec 100%);
 
-    /* ── Active mode vars (swapped by JS) ── */
+    /* ── Active mode vars ── */
     --pri:      var(--s-pri);
     --dark:     var(--s-dark);
     --light:    var(--s-light);
@@ -61,9 +59,7 @@
     transition: background .5s;
   }
 
-  /* ══════════════════════════════════════
-     SIDEBAR
-  ══════════════════════════════════════ */
+  /* SIDEBAR*/
   #sidebar {
     width: 300px;
     min-width: 300px;
@@ -227,9 +223,7 @@
   }
   @keyframes spinning { to { transform: rotate(360deg); } }
 
-  /* ══════════════════════════════════════
-     MAIN CANVAS
-  ══════════════════════════════════════ */
+  /* MAIN CANVAS */
   #main {
     flex: 1; position: relative; overflow: hidden;
     background: var(--mode-grad);
@@ -303,9 +297,7 @@
   .tool-btn:hover { background: var(--light); border-color: var(--pri); transform: scale(1.1); }
   .toolbar-div { width: 1px; height: 22px; background: var(--border); margin: 0 2px; }
 
-  /* ══════════════════════════════════════
-     ACTION PANEL (right slide-in)
-  ══════════════════════════════════════ */
+  /* RIGHT SIDE BAR (Action Panel)*/
   #action-panel {
     position: absolute; top: 0; right: -340px; bottom: 0; width: 320px;
     background: var(--white);
@@ -397,9 +389,7 @@
     border-color: #f0b8ce;
   }
 
-  /* ══════════════════════════════════════
-     CONTEXT MENU
-  ══════════════════════════════════════ */
+  /* CONTEXT MENU */
   #ctx {
     position: fixed; background: var(--white);
     border: 1.5px solid var(--border); border-radius: 13px;
@@ -416,9 +406,7 @@
   .ctx-item:hover { background: var(--light); color: var(--dark); }
   .ctx-item.danger:hover { background: #ffe8ec; color: #e11d48; }
 
-  /* ══════════════════════════════════════
-     TOAST
-  ══════════════════════════════════════ */
+  /* TOAST */
   #toast {
     position: fixed; top: 18px; left: 50%;
     transform: translateX(-50%) translateY(-80px);
@@ -431,15 +419,11 @@
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
 
-  /* ══════════════════════════════════════
-     SCROLLBAR
-  ══════════════════════════════════════ */
+  /* SCROLLBAR */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-  /* ══════════════════════════════════════
-     RESPONSIVE HINT
-  ══════════════════════════════════════ */
+  /* RESPONSIVE*/
   .hint-pill {
     position: absolute; bottom: 20px; left: 50%;
     transform: translateX(-50%);
@@ -460,7 +444,7 @@
 </head>
 <body>
 
-<!-- ════════════════ SIDEBAR ════════════════ -->
+<!-----------------------------SIDEBAR----------------------------------------->
 <aside id="sidebar">
   <div class="sb-header">
     <div class="logo">🌱 <em>Sprout</em></div>
@@ -540,7 +524,7 @@
   </div>
 </aside>
 
-<!-- ════════════════ CANVAS ════════════════ -->
+<!-------------------------------CANVAS--------------------------------------->
 <main id="main">
 
   <!-- Petals -->
@@ -624,11 +608,9 @@
 
 <div id="toast"></div>
 
-<!-- ════════════════ SCRIPT ════════════════ -->
+<!-----------------------------------SCRIPT--------------------------------------------->
 <script>
-/* ──────────────────────────────────────
-   STATE
-─────────────────────────────────────── */
+/* STATE */
 
 // Per-mode independent map state
 const maps = {
@@ -651,9 +633,7 @@ function getSelId()  { return maps[mode].selId; }
 function setSelId(v) { maps[mode].selId = v; }
 function nextId()    { return maps[mode].nodeId++; }
 
-/* ──────────────────────────────────────
-   DATA
-─────────────────────────────────────── */
+/* DATA */
 function mkNode(content, type = 'text', parentId = null) {
   return { id: nextId(), content, type, parentId, children: [], x: 0, y: 0, depth: 0 };
 }
@@ -677,9 +657,7 @@ function del(node, id) {
   return false;
 }
 
-/* ──────────────────────────────────────
-   MEDIA & FILE HANDLING
-─────────────────────────────────────── */
+/* MEDIA & FILE HANDLING */
 document.getElementById('add-type').addEventListener('change', function() {
   const type = this.value;
   document.getElementById('text-input').style.display = type === 'text' ? 'flex' : 'none';
@@ -736,9 +714,7 @@ function fileToBase64(file) {
 
 document.getElementById('record-btn').onclick = startRecording;
 
-/* ──────────────────────────────────────
-   MODE
-─────────────────────────────────────── */
+/* MODES */
 const STUDY_ACTIONS = [
   { id:'explain',   icon:'💡', label:'Explain It'   },
   { id:'quiz',      icon:'🧠', label:'Quiz Me'       },
@@ -800,9 +776,7 @@ function setMode(m) {
   }
 }
 
-/* ──────────────────────────────────────
-   LAYOUT
-─────────────────────────────────────── */
+/* LAYOUT */
 function layout() {
   const svg = document.getElementById('map-svg');
   const W = svg.clientWidth || 900, H = svg.clientHeight || 600;
@@ -823,9 +797,7 @@ function layoutKids(node, minA, maxA, len, depth) {
   });
 }
 
-/* ──────────────────────────────────────
-   RENDER
-─────────────────────────────────────── */
+/* RENDER*/
 function colorSet(depth) {
   if (mode === 'study') {
     // Matcha & Milk — sage greens + oat
@@ -975,9 +947,7 @@ function drawNode(node) {
   ng.appendChild(g);
 }
 
-/* ──────────────────────────────────────
-   UI ACTIONS
-─────────────────────────────────────── */
+/* UI */
 function plantTree() {
   const val = document.getElementById('root-input').value.trim();
   if (!val) { toast('Type a topic first! 🌸'); return; }
@@ -1055,9 +1025,7 @@ function delById(id) {
   renderMap(); toast('Node removed 🍃');
 }
 
-/* ──────────────────────────────────────
-   ACTION PANEL
-─────────────────────────────────────── */
+/* Action Panel */
 function openPanel(nodeId) {
   const node = find(getTree(), nodeId); if (!node) return;
   panelNodeId = nodeId; panelOpen = true;
@@ -1118,9 +1086,7 @@ function setOutputText(txt) { const o=document.getElementById('ap-output'); o.cl
 
 
 
-/* ──────────────────────────────────────
-   AI sidebar features
-─────────────────────────────────────── */
+/* AI sidebar features */
 async function aiGenerate() {
   if (!getTree()) return;
   const target = find(getTree(), getSelId()??getTree().id); if (!target) return;
@@ -1180,9 +1146,7 @@ function addChip(pid, text, el) {
 
 
 
-/* ──────────────────────────────────────
-   CONTEXT MENU
-─────────────────────────────────────── */
+/* CONTEXT MENU */
 function openCtx(e,id) { ctxId=id; const c=document.getElementById('ctx'); c.style.left=e.clientX+'px'; c.style.top=e.clientY+'px'; c.classList.add('vis'); }
 document.addEventListener('click',()=>document.getElementById('ctx').classList.remove('vis'));
 function ctxChild()  { if(ctxId!=null){selectNode(ctxId);document.getElementById('idea-input').focus();} }
@@ -1191,9 +1155,7 @@ function ctxRefine() { if(ctxId!=null){selectNode(ctxId);aiRefine();} }
 function ctxSprout() { if(ctxId!=null){openPanel(ctxId);} }
 function ctxDel()    { if(ctxId!=null) delById(ctxId); }
 
-/* ──────────────────────────────────────
-   PAN & ZOOM
-─────────────────────────────────────── */
+/* PAN and ZOOM */
 const mapSvg = document.getElementById('map-svg');
 const panG   = document.getElementById('pan-g');
 
@@ -1214,9 +1176,7 @@ function doZoom(d,cx,cy) {
 function applyXform() { panG.setAttribute('transform',`translate(${panX},${panY}) scale(${scale})`); }
 function resetView()  { panX=0;panY=0;scale=1;applyXform(); }
 
-/* ──────────────────────────────────────
-   MISC
-─────────────────────────────────────── */
+/* MISC */
 function showAiLoad(v) { document.getElementById('ai-load').classList.toggle('gone',!v); }
 
 let toastTid;
@@ -1247,9 +1207,7 @@ mapSvg.addEventListener('click',e=>{
   }
 });
 
-/* ──────────────────────────────────────
-   BOARDS — Save & Load
-─────────────────────────────────────── */
+/* BOARDS - Save and Load Boards */
 async function saveBoard() {
   const t = getTree();
   if (!t) { toast('Nothing to save yet! 🌱'); return; }

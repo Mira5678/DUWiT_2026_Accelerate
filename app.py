@@ -1,7 +1,5 @@
-# ╔══════════════════════════════════════════════════╗
-# ║  Sprout — The Aesthetic Visual Mapping OS        ║
-# ║  Backend: Flask + Groq                           ║
-# ╚══════════════════════════════════════════════════╝
+# Sprout — The Aesthetic Visual Mapping OS 
+# Backend: Flask + Groq                           
 
 import os
 import json
@@ -24,9 +22,7 @@ client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 # In-memory boards store (persists while server is running)
 boards_store = {}
 
-# ════════════════════════════════════════
 #  DATABASE
-# ════════════════════════════════════════
 DB_PATH = os.path.join(os.path.dirname(__file__), "sprout.db")
 
 def init_db():
@@ -52,10 +48,7 @@ SYSTEM = (
     "a cozy visual mapping app. Be helpful, specific, and delightful."
 )
 
-
-# ════════════════════════════════════════
-#  HELPERS
-# ════════════════════════════════════════
+# HELPERS
 def ask(prompt, max_tokens=400):
     response = client.chat.completions.create(
         model=MODEL,
@@ -72,11 +65,7 @@ def parse_json(text):
     clean = text.replace("```json", "").replace("```", "").strip()
     return json.loads(clean)
 
-
-# ════════════════════════════════════════
 #  PAGE ROUTES
-# ════════════════════════════════════════
-
 @app.route("/")
 def index():
     if not session.get("user"):
@@ -104,10 +93,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-
-# ════════════════════════════════════════
-#  AUTH ROUTES
-# ════════════════════════════════════════
+# AUTHENTICATION ROUTES
 
 @app.route("/api/login", methods=["POST"])
 def api_login():
@@ -159,11 +145,7 @@ def api_set_mode():
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "Invalid mode"}), 400
 
-
-# ════════════════════════════════════════
-#  AI — SHARED
-# ════════════════════════════════════════
-
+#  AI FEATURES
 @app.route("/api/generate-ideas", methods=["POST"])
 def generate_ideas():
     try:
@@ -225,11 +207,9 @@ def refine_idea():
         print(f"[refine-idea error] {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+#  AI — Action
 
-# ════════════════════════════════════════
-#  AI — STUDY HUB
-# ════════════════════════════════════════
-
+#Explain
 @app.route("/api/study/explain", methods=["POST"])
 def study_explain():
     try:
@@ -242,7 +222,7 @@ def study_explain():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-
+#Quiz
 @app.route("/api/study/quiz", methods=["POST"])
 def study_quiz():
     try:
@@ -255,7 +235,7 @@ def study_quiz():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-
+#flashcards
 @app.route("/api/study/flashcards", methods=["POST"])
 def study_flashcards():
     try:
@@ -268,7 +248,7 @@ def study_flashcards():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-
+#Connections
 @app.route("/api/study/connect", methods=["POST"])
 def study_connect():
     try:
@@ -283,10 +263,8 @@ def study_connect():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# ════════════════════════════════════════
-#  AI — CREATIVE STUDIO
-# ════════════════════════════════════════
 
+#  AI — CREATIVE STUDIO
 @app.route("/api/content/script", methods=["POST"])
 def content_script():
     try:
@@ -337,7 +315,6 @@ def content_plan():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-
 @app.route("/api/content/hooks", methods=["POST"])
 def content_hooks():
     try:
@@ -358,7 +335,6 @@ def content_hooks():
         return jsonify({"success": True, "text": ask(prompt, max_tokens=400)})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-
 
 @app.route("/api/content/shotlist", methods=["POST"])
 def content_shotlist():
@@ -381,11 +357,7 @@ def content_shotlist():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-
-# ════════════════════════════════════════
 #  BOARDS — Save & Load
-# ════════════════════════════════════════
-
 @app.route("/api/boards/save", methods=["POST"])
 def save_board():
     if not session.get("user"):
@@ -404,7 +376,6 @@ def save_board():
     }
     return jsonify({"success": True, "id": board_id})
 
-
 @app.route("/api/boards", methods=["GET"])
 def list_boards():
     if not session.get("user"):
@@ -415,7 +386,6 @@ def list_boards():
     ]
     return jsonify({"success": True, "boards": summaries})
 
-
 @app.route("/api/boards/<board_id>", methods=["GET"])
 def get_board(board_id):
     if not session.get("user"):
@@ -424,7 +394,6 @@ def get_board(board_id):
     if not board:
         return jsonify({"success": False, "error": "Board not found"}), 404
     return jsonify({"success": True, "board": board})
-
 
 @app.route("/api/boards/<board_id>", methods=["DELETE"])
 def delete_board(board_id):
@@ -435,9 +404,5 @@ def delete_board(board_id):
     del boards_store[board_id]
     return jsonify({"success": True})
 
-
-# ════════════════════════════════════════
-#  RUN
-# ════════════════════════════════════════
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
