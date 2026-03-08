@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -683,6 +683,10 @@
 /* ──────────────────────────────────────
    STATE
 ─────────────────────────────────────── */
+let maps = {
+  study: { tree: null, nodeId: 0, selId: null },
+  content: { tree: null, nodeId: 0, selId: null }
+};
 let tree = null;
 let nodeId = 0;
 let selId = null;
@@ -804,7 +808,18 @@ const CONTENT_ACTIONS = [
 
 
 function setMode(m) {
+  // Save current state to maps
+  maps[mode].tree = tree;
+  maps[mode].nodeId = nodeId;
+  maps[mode].selId = selId;
+
   mode = m;
+
+  // Load state from maps
+  tree = maps[mode].tree;
+  nodeId = maps[mode].nodeId;
+  selId = maps[mode].selId;
+
   // toggle buttons
   document.getElementById('btn-study').className   = 'mode-btn' + (m==='study'   ? ' active-study'   : '');
   document.getElementById('btn-content').className = 'mode-btn' + (m==='content' ? ' active-content' : '');
@@ -825,7 +840,27 @@ function setMode(m) {
   document.getElementById('ap-mode-label').textContent = m === 'study' ? '🌿 Study Node' : '🎨 Content Node';
   // rebuild action grid if panel open
   if (panelOpen) buildActionGrid(panelNodeId);
+
+  // Always clear canvas first
+  document.getElementById('edges-g').innerHTML = '';
+  document.getElementById('nodes-g').innerHTML = '';
+
+  // Update UI based on current tree
+  updateUIForMode();
   if (tree) renderMap();
+}
+
+
+function updateUIForMode() {
+  const hasTree = tree !== null;
+  document.getElementById('empty').classList.toggle('gone', hasTree);
+  ['add-sec','ai-sec','nodes-sec'].forEach(id => {
+    document.getElementById(id).style.display = hasTree ? 'block' : 'none';
+  });
+  document.getElementById('sugg-panel').classList.remove('vis');
+  if (!hasTree) {
+    closePanel();
+  }
 }
 
 
@@ -1021,6 +1056,10 @@ function plantTree() {
   const val = document.getElementById('root-input').value.trim();
   if (!val) { toast('Type a topic first! 🌸'); return; }
   nodeId = 0; tree = mkNode(val, 'text'); selId = tree.id;
+  // Save to current mode's map
+  maps[mode].tree = tree;
+  maps[mode].nodeId = nodeId;
+  maps[mode].selId = selId;
   ['add-sec','ai-sec','nodes-sec'].forEach(id=>document.getElementById(id).style.display='block');
   renderMap(); resetView();
   toast('🌱 Your map is sprouting!');
@@ -1061,13 +1100,20 @@ function addNode(content, type) {
     currentAudio = null;
     document.getElementById('audio-preview').style.display = 'none';
   }
-  selId = node.id; renderMap();
+  selId = node.id;
+  // Save state to current mode's map
+  maps[mode].tree = tree;
+  maps[mode].nodeId = nodeId;
+  maps[mode].selId = selId;
+  renderMap();
   toast(`✿ "${type}" added!`);
 }
 
 
 function selectNode(id) {
   selId = id;
+  // Save state to current mode's map
+  maps[mode].selId = selId;
   const sel = document.getElementById('parent-sel');
   if (sel) sel.value = id;
   renderMap();
@@ -1097,6 +1143,10 @@ function delById(id) {
   del(tree,id);
   if (selId===id) selId=tree.id;
   if (panelNodeId===id) closePanel();
+  // Save state to current mode's map
+  maps[mode].tree = tree;
+  maps[mode].nodeId = nodeId;
+  maps[mode].selId = selId;
   renderMap(); toast('Node removed 🍃');
 }
 
@@ -1210,7 +1260,13 @@ async function aiRefine() {
   try {
     const res  = await fetch('/api/refine-idea',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea:target.content,parent:parent?parent.content:''})});
     const data = await res.json();
-    if (data.success) { target.content=data.refined; renderMap(); toast(`✨ Refined: "${data.refined}"`); }
+    if (data.success) {
+      target.content=data.refined;
+      // Save state to current mode's map
+      maps[mode].tree = tree;
+      renderMap();
+      toast(`✨ Refined: "${data.refined}"`);
+    }
     else toast('AI hiccup 🌸');
   } catch { toast('Server not reachable 🌐'); }
   showAiLoad(false);
@@ -1294,6 +1350,10 @@ function clearMap() {
   if(!tree)return;
   if(!confirm('Clear the entire map? This can\'t be undone.'))return;
   tree=null; selId=null; nodeId=0;
+  // Save cleared state to current mode's map
+  maps[mode].tree = tree;
+  maps[mode].nodeId = nodeId;
+  maps[mode].selId = selId;
   document.getElementById('edges-g').innerHTML='';
   document.getElementById('nodes-g').innerHTML='';
   document.getElementById('empty').classList.remove('gone');
@@ -1310,11 +1370,15 @@ window.addEventListener('resize',()=>{ if(tree)renderMap(); });
 // click canvas to deselect
 mapSvg.addEventListener('click',e=>{
   if(['map-svg','pan-g','edges-g','nodes-g'].includes(e.target.id)||e.target===mapSvg){
-    selId=null; if(tree)renderMap();
+    selId=null;
+    // Save state to current mode's map
+    maps[mode].selId = selId;
+    if(tree)renderMap();
   }
 });
+
+// Initialize maps and UI
+updateUIForMode();
 </script>
 </body>
 </html>
-
-
