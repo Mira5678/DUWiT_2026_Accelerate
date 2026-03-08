@@ -8,26 +8,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Bubblegum+Sans&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg:       #fdf6f0;
-      --card:     #fffcfe;
-      --ink:      #3d3530;
-      --muted:    #a89f9a;
-      --subtle:   #e8e0db;
-      --border:   #ede5e0;
-      --s-pri:    #6dc49a;
-      --s-dark:   #3a7a5c;
-      --s-light:  #e6f7ef;
-      --s-border: #b5e3cb;
-      --c-pri:    #f4a4b8;
-      --c-dark:   #be4e6a;
+      --bg:       #f4f0e8;
+      --card:     #fffefb;
+      --ink:      #2e2a24;
+      --muted:    #9e978f;
+      --subtle:   #e2dbd2;
+      --border:   #ddd6ca;
+      --s-pri:    #7ab890;
+      --s-dark:   #3d6b50;
+      --s-light:  #eef6f1;
+      --s-border: #b8d9c4;
+      --c-pri:    #e8729a;
+      --c-dark:   #a83060;
       --c-light:  #fdeef4;
-      --c-border: #f8ccda;
+      --c-border: #f0b8ce;
+      --gold:     #c9972a;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Nunito', sans-serif;
-      background: var(--bg);
+      background: linear-gradient(160deg, #eef6f1 0%, #f4f0e8 40%, #fff5f0 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -44,9 +45,9 @@
       animation: blobFloat ease-in-out infinite alternate;
       pointer-events: none;
     }
-    .blob-1 { width: 500px; height: 500px; background: #d6f0e8; top: -150px; left: -150px; animation-duration: 9s; }
-    .blob-2 { width: 400px; height: 400px; background: #ffd6ec; bottom: -100px; right: -100px; animation-duration: 11s; }
-    .blob-3 { width: 300px; height: 300px; background: #e8d6f8; top: 50%; left: 55%; animation-duration: 8s; animation-delay: 3s; }
+    .blob-1 { width: 500px; height: 500px; background: #c8e8d4; top: -150px; left: -150px; animation-duration: 9s; }
+    .blob-2 { width: 400px; height: 400px; background: #f8d0e0; bottom: -100px; right: -100px; animation-duration: 11s; }
+    .blob-3 { width: 300px; height: 300px; background: #fef0c8; top: 50%; left: 55%; animation-duration: 8s; animation-delay: 3s; }
     @keyframes blobFloat {
       from { transform: translate(0,0) scale(1); }
       to   { transform: translate(18px,-18px) scale(1.05); }
@@ -151,8 +152,8 @@
     .mode-card.content::before{ background: radial-gradient(ellipse at top left, #fdeef4, transparent 60%); }
     .mode-card:hover { transform: translateY(-6px) scale(1.02); }
     .mode-card:hover::before { opacity: 1; }
-    .mode-card.study:hover  { border-color: var(--s-border); box-shadow: 0 16px 48px rgba(61,53,48,.13), 0 0 0 1px var(--s-border); }
-    .mode-card.content:hover{ border-color: var(--c-border); box-shadow: 0 16px 48px rgba(61,53,48,.13), 0 0 0 1px var(--c-border); }
+    .mode-card.study:hover  { border-color: var(--s-border); box-shadow: 0 16px 48px rgba(61,53,48,.13), 0 0 0 1px var(--s-border), 0 0 32px rgba(122,184,144,.15); }
+    .mode-card.content:hover{ border-color: var(--c-border); box-shadow: 0 16px 48px rgba(61,53,48,.13), 0 0 0 1px var(--c-border), 0 0 32px rgba(232,114,154,.18); }
     .mode-card:active { transform: translateY(-2px) scale(.99); }
 
     /* selected state */
@@ -175,8 +176,8 @@
       font-size: 34px; margin-bottom: 18px;
       transition: transform .3s cubic-bezier(.34,1.56,.64,1);
     }
-    .mode-card.study  .mode-icon-wrap { background: var(--s-light); border: 2px solid var(--s-border); }
-    .mode-card.content .mode-icon-wrap{ background: var(--c-light); border: 2px solid var(--c-border); }
+    .mode-card.study  .mode-icon-wrap { background: linear-gradient(135deg, var(--s-light), #f0ebe0); border: 2px solid var(--s-border); }
+    .mode-card.content .mode-icon-wrap{ background: linear-gradient(135deg, var(--c-light), #fef8ec); border: 2px solid var(--c-border); }
     .mode-card:hover .mode-icon-wrap { transform: scale(1.1) rotate(-4deg); }
 
     .mode-name {
@@ -220,8 +221,8 @@
       align-items: center; justify-content: center; gap: 7px;
       position: relative; z-index: 1;
     }
-    .mode-card.study  .mode-enter { background: var(--s-pri); color: white; box-shadow: 0 4px 14px rgba(61,53,48,.15); }
-    .mode-card.content .mode-enter{ background: var(--c-pri); color: white; box-shadow: 0 4px 14px rgba(61,53,48,.15); }
+    .mode-card.study  .mode-enter { background: linear-gradient(135deg, var(--s-pri), #5aaa7a); color: white; box-shadow: 0 4px 14px rgba(61,53,48,.15); }
+    .mode-card.content .mode-enter{ background: linear-gradient(135deg, var(--c-pri), var(--gold)); color: white; box-shadow: 0 4px 14px rgba(61,53,48,.15); }
     .mode-enter:hover { filter: brightness(1.07); transform: translateY(-1px); }
 
     /* "or do both" note */
@@ -326,7 +327,7 @@
         <div class="mode-name">Study Hub</div>
         <div class="mode-tagline">Learn Visually</div>
         <p class="mode-desc">
-          Turn textbooks, notes, and complex topics into beautiful concept maps you can actually interact with.
+          Turn notes and complex topics into visual mindmaps you can interact with.
         </p>
         <ul class="features">
           <li><div class="feat-dot">🗺️</div> AI Concept Maps from any topic</li>
@@ -346,13 +347,13 @@
         <div class="mode-name">Creative Studio</div>
         <div class="mode-tagline">Create Content</div>
         <p class="mode-desc">
-          Brain-dump your messiest ideas and watch Lumi turn them into a fully organized content pipeline.
+          Brain-dump your messiest ideas and turn them into a fully organized content plan.
         </p>
         <ul class="features">
           <li><div class="feat-dot">🎬</div> Brain-dump → Content Map</li>
           <li><div class="feat-dot">✍️</div> Generate TikTok scripts</li>
-          <li><div class="feat-dot">🎨</div> Colorblind-friendly moodboards</li>
-          <li><div class="feat-dot">⚡</div> Hook ideas & shot lists</li>
+          <li><div class="feat-dot">📅</div> Content planner & calendar</li>
+          <li><div class="feat-dot">⚡</div> Hook & shot ideas</li>
         </ul>
         <button class="mode-enter" onclick="goMode('content')">
           🎨 Enter Creative Studio →
@@ -363,7 +364,7 @@
 
     <p class="both-note">
       You can switch between modes any time from inside the app ✦
-      <br/>Need help? <a href="#">Lumi's got you covered 🌱</a>
+      <br/>
     </p>
 
   </div>
