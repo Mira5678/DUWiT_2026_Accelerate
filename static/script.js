@@ -367,11 +367,24 @@ function refreshNodeList() {
 }
 
 function deleteNodeById(id) {
-  if (!tree || id === tree.id) return;
-  deleteNode(tree, id);
-  if (selectedNodeId === id) selectedNodeId = tree.id;
-  renderMap();
-  showToast('Node removed 🍃');
+  if (!tree) return;
+
+  // Prevent deleting root
+  if (id === tree.id) {
+    showToast("You can't delete the root 🌳");
+    return;
+  }
+
+  const deleted = deleteNode(tree, id);
+
+  if (deleted) {
+    if (selectedNodeId === id) {
+      selectedNodeId = tree.id;
+    }
+
+    renderMap();
+    showToast('Node removed 🍃');
+  }
 }
 
 // ══════════════════════════════════════════════
